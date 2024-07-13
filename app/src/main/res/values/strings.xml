@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Context Aware Music App</string>
+    <string name="title_auth_activity">Authentication</string>
+</resources>

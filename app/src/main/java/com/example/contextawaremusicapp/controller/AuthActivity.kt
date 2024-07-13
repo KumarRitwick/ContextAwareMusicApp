@@ -5,12 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import com.example.contextawaremusicapp.MainActivity
 import com.spotify.sdk.android.auth.AuthorizationClient
 import com.spotify.sdk.android.auth.AuthorizationRequest
 import com.spotify.sdk.android.auth.AuthorizationResponse
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.example.contextawaremusicapp.MainActivity
 
 class AuthActivity : AppCompatActivity() {
 
@@ -36,6 +36,7 @@ class AuthActivity : AppCompatActivity() {
             if (response.type == AuthorizationResponse.Type.TOKEN) {
                 val accessToken = response.accessToken
                 Log.d("AuthActivity", "Access Token Received: $accessToken")
+
                 saveAccessToken(this, accessToken)
                 val returnIntent = Intent(this, MainActivity::class.java)
                 startActivity(returnIntent)

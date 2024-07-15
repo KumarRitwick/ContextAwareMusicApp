@@ -1,6 +1,7 @@
 package com.example.contextawaremusicapp
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -21,13 +22,20 @@ import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.ui.theme.ContextAwareMusicAppTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import com.example.contextawaremusicapp.controller.AuthActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : ComponentActivity() {
+    var flag : Boolean = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (!flag) {
+            flag = true
+            var intent = Intent(this, AuthActivity::class.java)
+            startActivity(intent)
+        }
         setContent {
             ContextAwareMusicAppTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -79,7 +87,7 @@ fun getAccessToken(context: Context): String {
 
     val sharedPreferences = EncryptedSharedPreferences.create(
         context,
-        "SpotifyCredentials",
+        "SpotifyCredential",
         masterKeyAlias,
         EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
         EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM

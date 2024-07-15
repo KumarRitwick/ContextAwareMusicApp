@@ -12,18 +12,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ContextAwareMusicApp"
         tools:targetApi="31">
-
-        <activity
-            android:name=".MainActivity"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.ContextAwareMusicApp">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
         <activity
             android:name=".controller.AuthActivity"
             android:label="@string/title_auth_activity"
@@ -36,6 +24,16 @@
                 <data
                     android:scheme="contextawaremusicapp"
                     android:host="callback" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.ContextAwareMusicApp">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 

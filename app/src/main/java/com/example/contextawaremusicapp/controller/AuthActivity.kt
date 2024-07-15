@@ -57,7 +57,7 @@ class AuthActivity : AppCompatActivity() {
 
         val sharedPreferences = EncryptedSharedPreferences.create(
             context,
-            "SpotifyCredentials",
+            "SpotifyCredential",
             masterKeyAlias,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM

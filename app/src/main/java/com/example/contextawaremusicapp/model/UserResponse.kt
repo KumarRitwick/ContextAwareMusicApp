@@ -30,7 +30,3 @@ data class Followers(
     @SerializedName("href") val href: String?,
     @SerializedName("total") val total: Int
 )
-
-data class Image(
-    @SerializedName("url") val url: String
-)

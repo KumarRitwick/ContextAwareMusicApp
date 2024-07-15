@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.contextawaremusicapp.controller.AuthActivity
+import com.example.contextawaremusicapp.controller.PlaylistAdapter
 import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
@@ -33,11 +34,11 @@ class MainActivity : ComponentActivity() {
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = TrackAdapter(listOf()) // Initialize with an empty list
+        recyclerView.adapter = PlaylistAdapter(listOf()) // Initialize with an empty list
 
         fetchUserProfile { userId ->
             fetchPlaylists(userId) { playlists ->
-                (recyclerView.adapter as TrackAdapter).updateTracks(playlists)
+                (recyclerView.adapter as PlaylistAdapter).updateTracks(playlists)
             }
         }
     }
@@ -65,7 +66,6 @@ class MainActivity : ComponentActivity() {
             Log.e("MainActivity", "Access token is missing")
         }
     }
-
 
     private fun fetchPlaylists(userId: String, onResult: (List<Playlist>) -> Unit) {
         val accessToken = getAccessToken(this)

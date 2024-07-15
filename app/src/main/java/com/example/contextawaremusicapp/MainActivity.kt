@@ -34,13 +34,21 @@ class MainActivity : ComponentActivity() {
 
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = PlaylistAdapter(listOf()) // Initialize with an empty list
+        val adapter = PlaylistAdapter(listOf()) { playlistUri ->
+            playPlaylist(playlistUri)
+        }
+        recyclerView.adapter = adapter
 
         fetchUserProfile { userId ->
             fetchPlaylists(userId) { playlists ->
-                (recyclerView.adapter as PlaylistAdapter).updateTracks(playlists)
+                adapter.updateTracks(playlists)
             }
         }
+    }
+
+    private fun playPlaylist(playlistUri: String) {
+        // Implement play playlist functionality here
+        Log.d("MainActivity", "Playing playlist: $playlistUri")
     }
 
     private fun fetchUserProfile(onResult: (String) -> Unit) {

@@ -10,7 +10,10 @@ import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.model.Playlist
 
-class PlaylistAdapter(private var playlists: List<Playlist>) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
+class PlaylistAdapter(
+    private var playlists: List<Playlist>,
+    private val onItemClick: (String) -> Unit
+) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     class PlaylistViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val playlistName: TextView = view.findViewById(R.id.playlistName)
@@ -31,6 +34,9 @@ class PlaylistAdapter(private var playlists: List<Playlist>) : RecyclerView.Adap
             Glide.with(holder.playlistImage.context)
                 .load(playlist.images[0].url)
                 .into(holder.playlistImage)
+        }
+        holder.itemView.setOnClickListener {
+            onItemClick(playlist.uri)
         }
     }
 

@@ -9,21 +9,23 @@
         android:id="@+id/playlistImage"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:scaleType="centerCrop" />
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="8dp" />
 
     <TextView
         android:id="@+id/playlistName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:paddingTop="8dp"
-        android:textSize="18sp" />
+        android:textSize="18sp"
+        android:paddingBottom="4dp"
+        android:textColor="@android:color/black" />
 
     <TextView
         android:id="@+id/playlistDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingTop="4dp"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:textColor="@android:color/darker_gray" />
 
 </LinearLayout>

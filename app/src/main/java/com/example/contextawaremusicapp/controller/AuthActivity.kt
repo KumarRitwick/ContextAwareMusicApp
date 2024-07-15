@@ -35,9 +35,10 @@ class AuthActivity : AppCompatActivity() {
             Log.d("AuthActivity", "Authorization response received: ${response.type}")
             if (response.type == AuthorizationResponse.Type.TOKEN) {
                 val accessToken = response.accessToken
+                val expiresIn = response.expiresIn
                 Log.d("AuthActivity", "Access Token Received: $accessToken")
 
-                saveAccessToken(this, accessToken)
+                saveAccessToken(this, accessToken, expiresIn)
                 val returnIntent = Intent(this, MainActivity::class.java)
                 startActivity(returnIntent)
                 finish()
@@ -49,7 +50,7 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    private fun saveAccessToken(context: Context, token: String) {
+    private fun saveAccessToken(context: Context, token: String, expiresIn: Int) {
         Log.d("AuthActivity", "Storing Access Token: $token")
         val masterKeyAlias = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -63,7 +64,11 @@ class AuthActivity : AppCompatActivity() {
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
 
-        sharedPreferences.edit().putString("ACCESS_TOKEN", token).apply()
+        val expiryTime = System.currentTimeMillis() + expiresIn * 1000
+        sharedPreferences.edit()
+            .putString("ACCESS_TOKEN", token)
+            .putLong("EXPIRY_TIME", expiryTime)
+            .apply()
         Log.d("AuthActivity", "Access Token Stored: ${sharedPreferences.getString("ACCESS_TOKEN", "")}")
     }
 

@@ -12,6 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ContextAwareMusicApp"
         tools:targetApi="31">
+
+        <!-- SplashScreenActivity as the new launcher activity -->
+        <activity
+            android:name=".SplashScreenActivity"
+            android:exported="true"
+            android:theme="@style/SplashTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <!-- AuthActivity remains unchanged -->
         <activity
             android:name=".controller.AuthActivity"
             android:label="@string/title_auth_activity"
@@ -26,15 +39,13 @@
                     android:host="callback" />
             </intent-filter>
         </activity>
+
+        <!-- MainActivity is no longer the launcher activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.ContextAwareMusicApp">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
 
     </application>

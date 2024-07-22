@@ -78,4 +78,8 @@ dependencies {
     implementation("com.google.android.material:material:1.4.0")
     implementation ("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+
+    implementation ("com.google.code.gson:gson:2.6.1")
+    implementation(files("libs/spotify-app-remote-release-0.8.0.aar"))
+
 }

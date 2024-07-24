@@ -3,6 +3,8 @@ package com.example.contextawaremusicapp.controller
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,6 +17,9 @@ import com.example.contextawaremusicapp.MainActivity
 
 class AuthActivity : AppCompatActivity() {
 
+    private var retryCount = 0
+    private val maxRetries = 3
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Log.d("AuthActivity", "onCreate called")
@@ -23,7 +28,7 @@ class AuthActivity : AppCompatActivity() {
 
     private fun startAuthorization() {
         val builder = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
-        builder.setScopes(arrayOf("user-read-private", "playlist-read-private", "playlist-read-collaborative", "streaming"))
+        builder.setScopes(arrayOf("user-read-private", "playlist-read-private", "playlist-read-collaborative", "user-library-read", "streaming"))
         val request = builder.build()
 
         AuthorizationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request)
@@ -48,10 +53,23 @@ class AuthActivity : AppCompatActivity() {
                 finish()
             } else if (response.type == AuthorizationResponse.Type.ERROR) {
                 Log.e("AuthActivity", "Failed to receive token: ${response.error}")
-                Toast.makeText(this, "Authentication failed: ${response.error}", Toast.LENGTH_LONG).show()
+                handleAuthError(response.error)
             }
         } else {
             Log.e("AuthActivity", "Request code did not match")
+        }
+    }
+
+    private fun handleAuthError(error: String) {
+        if (error == "AUTHENTICATION_SERVICE_UNAVAILABLE" && retryCount < maxRetries) {
+            retryCount++
+            Toast.makeText(this, "Authentication service unavailable. Retrying...", Toast.LENGTH_SHORT).show()
+            Handler(Looper.getMainLooper()).postDelayed({
+                startAuthorization()
+            }, 3000) // Retry after 3 seconds
+        } else {
+            Toast.makeText(this, "Authentication failed: $error", Toast.LENGTH_LONG).show()
+            retryCount = 0 // Reset retry count on failure
         }
     }
 

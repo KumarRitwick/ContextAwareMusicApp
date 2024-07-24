@@ -15,17 +15,10 @@ import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.model.UserResponse
+import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import com.spotify.android.appremote.api.ConnectionParams;
-import com.spotify.android.appremote.api.Connector;
-import com.spotify.android.appremote.api.SpotifyAppRemote;
-
-import com.spotify.protocol.client.Subscription;
-import com.spotify.protocol.types.PlayerState;
-import com.spotify.protocol.types.Track;
-
 
 class MainActivity : ComponentActivity() {
 
@@ -43,6 +36,7 @@ class MainActivity : ComponentActivity() {
         val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         val adapter = PlaylistAdapter(listOf()) { playlistUri ->
+            Log.d("MainActivity", "Playlist clicked: $playlistUri")
             playPlaylist(playlistUri)
         }
         recyclerView.adapter = adapter
@@ -55,8 +49,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun playPlaylist(playlistUri: String) {
-        // Implement play playlist functionality here
-        Log.d("MainActivity", "Playing playlist: $playlistUri")
+        Log.d("MainActivity", "Attempting to play playlist: $playlistUri")
+        SpotifyRemoteManager.play(playlistUri, {
+            Log.d("MainActivity", "Playing playlist: $playlistUri")
+        }, {
+            Log.e("MainActivity", "Error playing playlist: $playlistUri", it)
+        })
     }
 
     private fun fetchUserProfile(onResult: (String) -> Unit) {
@@ -145,5 +143,19 @@ class MainActivity : ComponentActivity() {
         )
 
         return sharedPreferences.getLong("EXPIRY_TIME", 0L)
+    }
+
+    override fun onStart() {
+        super.onStart()
+        SpotifyRemoteManager.connect(this, {
+            Log.d("MainActivity", "Connected to Spotify App Remote")
+        }, { throwable ->
+            Log.e("MainActivity", "Failed to connect to Spotify App Remote", throwable)
+        })
+    }
+
+    override fun onStop() {
+        super.onStop()
+        SpotifyRemoteManager.disconnect()
     }
 }

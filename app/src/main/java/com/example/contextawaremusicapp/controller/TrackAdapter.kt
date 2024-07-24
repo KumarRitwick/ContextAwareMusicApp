@@ -24,8 +24,7 @@ class TrackAdapter(private var tracks: List<Playlist>) : RecyclerView.Adapter<Tr
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
         holder.trackName.text = track.name
-        holder.artistName.text = track.description // Assuming Playlist has a description field
-        // Optionally load the album image if you have a URL
+        holder.artistName.text = track.description
     }
 
     override fun getItemCount() = tracks.size

@@ -1,31 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:orientation="vertical"
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/playlistImage"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="centerCrop"
-        android:layout_marginBottom="8dp" />
+        android:layout_height="150dp"
+        android:scaleType="centerCrop" />
 
     <TextView
         android:id="@+id/playlistName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:textSize="18sp"
-        android:paddingBottom="4dp"
-        android:textColor="@android:color/black" />
+        android:textSize="16sp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp" />
 
     <TextView
         android:id="@+id/playlistDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
-        android:textColor="@android:color/darker_gray" />
+        android:textSize="14sp" />
 
 </LinearLayout>

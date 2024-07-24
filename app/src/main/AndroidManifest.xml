@@ -23,8 +23,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <!-- AuthActivity remains unchanged -->
+        
         <activity
             android:name=".controller.AuthActivity"
             android:label="@string/title_auth_activity"
@@ -40,7 +39,6 @@
             </intent-filter>
         </activity>
 
-        <!-- MainActivity is no longer the launcher activity -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

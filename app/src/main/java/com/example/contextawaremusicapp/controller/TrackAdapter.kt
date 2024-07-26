@@ -1,14 +1,17 @@
-package com.example.contextawaremusicapp
+package com.example.contextawaremusicapp.controller
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.contextawaremusicapp.model.Playlist
+import com.bumptech.glide.Glide
+import com.example.contextawaremusicapp.R
+import com.example.contextawaremusicapp.model.Track
 
-class TrackAdapter(private var tracks: List<Playlist>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
+class TrackAdapter(private var tracks: List<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
     class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val trackName: TextView = view.findViewById(R.id.textViewTrackName)
@@ -23,13 +26,27 @@ class TrackAdapter(private var tracks: List<Playlist>) : RecyclerView.Adapter<Tr
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
-        holder.trackName.text = track.name
-        holder.artistName.text = track.description
+        if (track != null) {
+            holder.trackName.text = track.name
+            holder.artistName.text = track.artists.joinToString(", ") { it.name }
+            if (track.album.images.isNotEmpty()) {
+                Glide.with(holder.albumImage.context)
+                    .load(track.album.images[0].url)
+                    .into(holder.albumImage)
+            } else {
+                holder.albumImage.setImageResource(R.drawable.placeholder_image)
+            }
+        } else {
+            Log.e("TrackAdapter", "Track at position $position is null")
+            holder.trackName.text = "Unknown"
+            holder.artistName.text = "Unknown Artist"
+            holder.albumImage.setImageResource(R.drawable.placeholder_image)
+        }
     }
 
     override fun getItemCount() = tracks.size
 
-    fun updateTracks(newTracks: List<Playlist>) {
+    fun updateTracks(newTracks: List<Track>) {
         tracks = newTracks
         notifyDataSetChanged()
     }

@@ -4,23 +4,16 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.contextawaremusicapp.controller.AuthActivity
-import com.example.contextawaremusicapp.controller.PlaylistAdapter
-import com.example.contextawaremusicapp.model.Playlist
-import com.example.contextawaremusicapp.model.PlaylistsResponse
-import com.example.contextawaremusicapp.model.SpotifyApi
-import com.example.contextawaremusicapp.model.UserResponse
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,75 +26,13 @@ class MainActivity : ComponentActivity() {
 
         setContentView(R.layout.activity_main)
 
-        val recyclerView: RecyclerView = findViewById(R.id.recyclerView)
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        val adapter = PlaylistAdapter(listOf()) { playlistUri ->
-            Log.d("MainActivity", "Playlist clicked: $playlistUri")
-            playPlaylist(playlistUri)
-        }
-        recyclerView.adapter = adapter
+        // Setup Bottom Navigation
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
 
-        fetchUserProfile { userId ->
-            fetchPlaylists(userId) { playlists ->
-                adapter.updateTracks(playlists)
-            }
-        }
-    }
-
-    private fun playPlaylist(playlistUri: String) {
-        Log.d("MainActivity", "Attempting to play playlist: $playlistUri")
-        SpotifyRemoteManager.play(playlistUri, {
-            Log.d("MainActivity", "Playing playlist: $playlistUri")
-        }, {
-            Log.e("MainActivity", "Error playing playlist: $playlistUri", it)
-        })
-    }
-
-    private fun fetchUserProfile(onResult: (String) -> Unit) {
-        val accessToken = getAccessToken(this)
-        Log.d("MainActivity", "Using Access Token: $accessToken")
-        if (accessToken.isNotEmpty()) {
-            SpotifyApi.service.getCurrentUser("Bearer $accessToken").enqueue(object : Callback<UserResponse> {
-                override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
-                    if (response.isSuccessful) {
-                        val userId = response.body()?.id ?: return
-                        onResult(userId)
-                    } else {
-                        Log.e("MainActivity", "Error fetching user ID: ${response.message()} Code: ${response.code()}")
-                        Log.e("MainActivity", "Response body: ${response.errorBody()?.string()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                    Log.e("MainActivity", "API call failed: ${t.message}")
-                }
-            })
-        } else {
-            Log.e("MainActivity", "Access token is missing")
-        }
-    }
-
-    private fun fetchPlaylists(userId: String, onResult: (List<Playlist>) -> Unit) {
-        val accessToken = getAccessToken(this)
-        Log.d("MainActivity", "Using Access Token: $accessToken")
-        if (accessToken.isNotEmpty()) {
-            SpotifyApi.service.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
-                override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
-                    if (response.isSuccessful) {
-                        val playlists = response.body()?.playlists ?: emptyList()
-                        onResult(playlists)
-                    } else {
-                        Log.e("MainActivity", "Error fetching playlists: ${response.message()} Code: ${response.code()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<PlaylistsResponse>, t: Throwable) {
-                    Log.e("MainActivity", "API call failed: ${t.message}")
-                }
-            })
-        } else {
-            Log.e("MainActivity", "Access token is missing")
-        }
+        val navController = navHostFragment.navController
+        val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation_view)
+        bottomNavigationView.setupWithNavController(navController)
     }
 
     private fun getAccessToken(context: Context): String {

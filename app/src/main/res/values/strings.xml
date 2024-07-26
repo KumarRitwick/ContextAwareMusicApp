@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">Context Aware Music App</string>
     <string name="title_auth_activity">Authentication</string>
+    <string name="title_home">Home</string>
+    <string name="title_playlists">Playlists</string>
+    <string name="title_song_detail">Song Detail</string>
+    <string name="playlist_image">Playlist Image</string>
+    <string name="album_art">Album Art</string>
 </resources>

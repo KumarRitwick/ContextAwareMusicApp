@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.security.crypto.EncryptedSharedPreferences
@@ -86,7 +87,8 @@ class PlaylistFragment : Fragment() {
     }
 
     private fun playPlaylist(playlistUri: String) {
-        Log.d("PlaylistFragment", "Playing playlist: $playlistUri")
+        val action = PlaylistFragmentDirections.actionPlaylistsToSongDetail(playlistUri)
+        findNavController().navigate(action)
     }
 
     private fun getAccessToken(context: Context): String {

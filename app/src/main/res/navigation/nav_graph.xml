@@ -15,5 +15,23 @@
         android:id="@+id/navigation_playlists"
         android:name="com.example.contextawaremusicapp.ui.playlists.PlaylistFragment"
         android:label="@string/title_playlists"
-        tools:layout="@layout/fragment_playlists" />
+        tools:layout="@layout/fragment_playlists">
+        <action
+            android:id="@+id/action_playlists_to_song_detail"
+            app:destination="@id/navigation_song_detail">
+            <argument
+                android:name="playlistUri"
+                app:argType="string" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_song_detail"
+        android:name="com.example.contextawaremusicapp.ui.songdetail.SongDetailFragment"
+        android:label="@string/title_song_detail"
+        tools:layout="@layout/fragment_song_detail">
+        <argument
+            android:name="playlistUri"
+            app:argType="string" />
+    </fragment>
 </navigation>

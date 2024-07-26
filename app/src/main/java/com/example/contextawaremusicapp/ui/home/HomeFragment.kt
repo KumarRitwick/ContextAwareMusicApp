@@ -9,13 +9,10 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.TrackAdapter
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.model.TracksResponse
-import com.example.contextawaremusicapp.model.Track
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -43,19 +40,11 @@ class HomeFragment : Fragment() {
 
     private fun fetchTracks() {
         val accessToken = getAccessToken(requireContext())
-        val trackIds = "3n3Ppam7vgaVa1iaRUc9Lp,3twNvmDtFQtAd5gMKedhLD,7C81Nw1PIVPOn7HeVYOIrR"
-        SpotifyApi.service.getTracks(
-            "Bearer $accessToken",
-            trackIds
-        ).enqueue(object : Callback<TracksResponse> {
+        SpotifyApi.service.getTracks("Bearer $accessToken", "track_ids_comma_separated").enqueue(object : Callback<TracksResponse> {
             override fun onResponse(call: Call<TracksResponse>, response: Response<TracksResponse>) {
                 if (response.isSuccessful) {
                     val tracks = response.body()?.tracks ?: emptyList()
-                    if (tracks.isNotEmpty()) {
-                        adapter.updateTracks(tracks)
-                    } else {
-                        Toast.makeText(context, "No tracks found", Toast.LENGTH_SHORT).show()
-                    }
+                    adapter.updateTracks(tracks)
                 } else {
                     Toast.makeText(context, "Error fetching tracks", Toast.LENGTH_SHORT).show()
                 }
@@ -68,18 +57,7 @@ class HomeFragment : Fragment() {
     }
 
     private fun getAccessToken(context: Context): String {
-        val masterKeyAlias = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "SpotifyCredential",
-            masterKeyAlias,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
-        return sharedPreferences.getString("ACCESS_TOKEN", "") ?: ""
+        // Implement your method to get the access token
+        return "your_access_token"
     }
 }

@@ -2,6 +2,7 @@ package com.example.contextawaremusicapp.ui.home
 
 import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,9 +11,10 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.contextawaremusicapp.R
-import com.example.contextawaremusicapp.controller.TrackAdapter
+import com.example.contextawaremusicapp.controller.GenreSection
+import com.example.contextawaremusicapp.controller.GenreSectionAdapter
+import com.example.contextawaremusicapp.model.RecommendationResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
-import com.example.contextawaremusicapp.model.TracksResponse
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -20,7 +22,7 @@ import retrofit2.Response
 class HomeFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: TrackAdapter
+    private lateinit var genreSectionAdapter: GenreSectionAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -30,34 +32,44 @@ class HomeFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.home_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = TrackAdapter(listOf())
-        recyclerView.adapter = adapter
 
-        fetchTracks()
+        fetchRecommendations()
 
         return view
     }
 
-    private fun fetchTracks() {
+    private fun fetchRecommendations() {
         val accessToken = getAccessToken(requireContext())
-        SpotifyApi.service.getTracks("Bearer $accessToken", "track_ids_comma_separated").enqueue(object : Callback<TracksResponse> {
-            override fun onResponse(call: Call<TracksResponse>, response: Response<TracksResponse>) {
-                if (response.isSuccessful) {
-                    val tracks = response.body()?.tracks ?: emptyList()
-                    adapter.updateTracks(tracks)
-                } else {
-                    Toast.makeText(context, "Error fetching tracks", Toast.LENGTH_SHORT).show()
-                }
-            }
+        val genres = listOf("pop", "rock", "hip-hop")
+        val limit = 10
+        val genreSections = mutableListOf<GenreSection>()
 
-            override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
-                Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
+        genres.forEach { genre ->
+            SpotifyApi.service.getRecommendations("Bearer $accessToken", limit, genre).enqueue(object : Callback<RecommendationResponse> {
+                override fun onResponse(call: Call<RecommendationResponse>, response: Response<RecommendationResponse>) {
+                    if (response.isSuccessful) {
+                        val tracks = response.body()?.tracks ?: emptyList()
+                        genreSections.add(GenreSection(genre, tracks))
+                        if (genreSections.size == genres.size) {
+                            genreSectionAdapter = GenreSectionAdapter(genreSections)
+                            recyclerView.adapter = genreSectionAdapter
+                        }
+                    } else {
+                        Log.e("HomeFragment", "Error fetching recommendations for $genre: ${response.message()}")
+                        Toast.makeText(context, "Error fetching recommendations for $genre", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                override fun onFailure(call: Call<RecommendationResponse>, t: Throwable) {
+                    Log.e("HomeFragment", "API call failed: ${t.message}")
+                    Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                }
+            })
+        }
     }
 
     private fun getAccessToken(context: Context): String {
-        // Implement your method to get the access token
-        return "your_access_token"
+        val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("ACCESS_TOKEN", "") ?: ""
     }
 }

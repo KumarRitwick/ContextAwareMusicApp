@@ -27,19 +27,14 @@ class TrackAdapter(
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
-        if (track != null) {
-            holder.trackName.text = track.name
-            holder.artistName.text = track.artists.joinToString(separator = ", ") { it.name }
-            // Load album image if available
-            if (track.album.images.isNotEmpty()) {
-                Glide.with(holder.albumImage.context)
-                    .load(track.album.images[0].url)
-                    .into(holder.albumImage)
-            }
+        holder.trackName.text = track.name
+        holder.artistName.text = track.artists.joinToString(separator = ", ") { it.name }
+        if (track.album.images.isNotEmpty()) {
+            Glide.with(holder.albumImage.context)
+                .load(track.album.images[0].url)
+                .into(holder.albumImage)
         } else {
-            holder.trackName.text = "Unknown"
-            holder.artistName.text = "Unknown Artist"
-            holder.albumImage.setImageResource(R.drawable.placeholder_image) // Assuming a placeholder image
+            holder.albumImage.setImageResource(R.drawable.placeholder_image)
         }
     }
 

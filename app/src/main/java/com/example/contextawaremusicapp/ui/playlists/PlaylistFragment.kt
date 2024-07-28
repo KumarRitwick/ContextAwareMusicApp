@@ -19,6 +19,7 @@ import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.model.UserResponse
+import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -54,8 +55,14 @@ class PlaylistFragment : Fragment() {
                     val userId = response.body()?.id ?: return
                     fetchPlaylists(userId)
                 } else {
-                    Log.e("PlaylistFragment", "Error fetching user ID: ${response.message()}")
-                    Toast.makeText(context, "Error fetching user ID", Toast.LENGTH_SHORT).show()
+                    if (response.code() == 401) {
+                        refreshToken {
+                            fetchUserPlaylists()
+                        }
+                    } else {
+                        Log.e("PlaylistFragment", "Error fetching user ID: ${response.message()}")
+                        Toast.makeText(context, "Error fetching user ID", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
@@ -74,8 +81,14 @@ class PlaylistFragment : Fragment() {
                     val playlists = response.body()?.playlists ?: emptyList()
                     adapter.updateTracks(playlists)
                 } else {
-                    Log.e("PlaylistFragment", "Error fetching playlists: ${response.message()} Code: ${response.code()}")
-                    Toast.makeText(context, "Error fetching playlists", Toast.LENGTH_SHORT).show()
+                    if (response.code() == 401) {
+                        refreshToken {
+                            fetchPlaylists(userId)
+                        }
+                    } else {
+                        Log.e("PlaylistFragment", "Error fetching playlists: ${response.message()} Code: ${response.code()}")
+                        Toast.makeText(context, "Error fetching playlists", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
 
@@ -105,5 +118,14 @@ class PlaylistFragment : Fragment() {
         )
 
         return sharedPreferences.getString("ACCESS_TOKEN", "") ?: ""
+    }
+
+    private fun refreshToken(onTokenRefreshed: () -> Unit) {
+        SpotifyRemoteManager.refreshToken(requireContext(), { newToken ->
+            onTokenRefreshed()
+        }, { error ->
+            Log.e("PlaylistFragment", "Error refreshing token", error)
+            Toast.makeText(context, "Error refreshing token", Toast.LENGTH_SHORT).show()
+        })
     }
 }

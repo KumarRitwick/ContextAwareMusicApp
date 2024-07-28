@@ -98,6 +98,7 @@ class AuthActivity : AppCompatActivity() {
     companion object {
         const val CLIENT_ID = "cffc2e76239543e18c44e888d655a3a3"
         const val REDIRECT_URI = "contextawaremusicapp://callback"
+        const val CLIENT_SECRET = "ad760e57f4de4a619fbaadadb9685e55"
         const val AUTH_TOKEN_REQUEST_CODE = 0x10
     }
 }

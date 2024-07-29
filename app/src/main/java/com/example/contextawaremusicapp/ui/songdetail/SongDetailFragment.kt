@@ -32,8 +32,8 @@ class SongDetailFragment : Fragment() {
     private val args: SongDetailFragmentArgs by navArgs()
 
     private lateinit var albumArt: ImageView
-    private lateinit var trackName: TextView
-    private lateinit var trackArtist: TextView
+    private lateinit var playlistName: TextView
+    private lateinit var playlistDescription: TextView
     private lateinit var tracksRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
 
@@ -44,12 +44,14 @@ class SongDetailFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_song_detail, container, false)
 
         albumArt = view.findViewById(R.id.album_art)
-        trackName = view.findViewById(R.id.track_name)
-        trackArtist = view.findViewById(R.id.track_artist)
+        playlistName = view.findViewById(R.id.playlist_name)
+        playlistDescription = view.findViewById(R.id.playlist_description)
         tracksRecyclerView = view.findViewById(R.id.tracks_recycler_view)
 
         tracksRecyclerView.layoutManager = LinearLayoutManager(context)
-        trackAdapter = TrackAdapter(listOf())
+        trackAdapter = TrackAdapter(listOf()) { track ->
+            playTrack(track)
+        }
         tracksRecyclerView.adapter = trackAdapter
 
         val playlistId = args.playlistUri.split(":").lastOrNull()
@@ -121,7 +123,8 @@ class SongDetailFragment : Fragment() {
     }
 
     private fun displayPlaylistDetails(playlist: Playlist) {
-        trackName.text = playlist.name
+        playlistName.text = playlist.name
+        playlistDescription.text = playlist.description
         if (playlist.images.isNotEmpty()) {
             Glide.with(this)
                 .load(playlist.images[0].url)
@@ -133,6 +136,15 @@ class SongDetailFragment : Fragment() {
 
     private fun displayTrackDetails(tracks: List<Track>) {
         trackAdapter.updateTracks(tracks)
+    }
+
+    private fun playTrack(track: Track) {
+        SpotifyRemoteManager.play(track.uri, {
+            Toast.makeText(context, "Playing ${track.name}", Toast.LENGTH_SHORT).show()
+        }, { error ->
+            Log.e("SongDetailFragment", "Error playing track: ${error.message}")
+            Toast.makeText(context, "Error playing track", Toast.LENGTH_SHORT).show()
+        })
     }
 
     private fun getAccessToken(context: Context): String {

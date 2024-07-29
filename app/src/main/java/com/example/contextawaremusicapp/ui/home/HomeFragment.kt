@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.contextawaremusicapp.R
@@ -15,6 +16,7 @@ import com.example.contextawaremusicapp.controller.GenreSection
 import com.example.contextawaremusicapp.controller.GenreSectionAdapter
 import com.example.contextawaremusicapp.model.RecommendationResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
+import com.example.contextawaremusicapp.model.Track
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -51,7 +53,9 @@ class HomeFragment : Fragment() {
                         val tracks = response.body()?.tracks ?: emptyList()
                         genreSections.add(GenreSection(genre, tracks))
                         if (genreSections.size == genres.size) {
-                            genreSectionAdapter = GenreSectionAdapter(genreSections)
+                            genreSectionAdapter = GenreSectionAdapter(genreSections) { track ->
+                                navigateToCurrentlyPlaying(track)
+                            }
                             recyclerView.adapter = genreSectionAdapter
                         }
                     } else {
@@ -66,6 +70,11 @@ class HomeFragment : Fragment() {
                 }
             })
         }
+    }
+
+    private fun navigateToCurrentlyPlaying(track: Track) {
+        val action = HomeFragmentDirections.actionNavigationHomeToCurrentlyPlaying(track)
+        findNavController().navigate(action)
     }
 
     private fun getAccessToken(context: Context): String {

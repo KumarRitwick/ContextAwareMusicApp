@@ -10,7 +10,8 @@ import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.model.Track
 
 class GenreSectionAdapter(
-    private val genreSections: List<GenreSection>
+    private val genreSections: List<GenreSection>,
+    private val onTrackClick: (Track) -> Unit // Add this parameter to accept a click listener
 ) : RecyclerView.Adapter<GenreSectionAdapter.GenreSectionViewHolder>() {
 
     class GenreSectionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -28,7 +29,9 @@ class GenreSectionAdapter(
         holder.genreTitle.text = genreSection.genre
 
         holder.tracksRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
-        val trackAdapter = TrackAdapter(genreSection.tracks)
+        val trackAdapter = TrackAdapter(genreSection.tracks) { track ->
+            onTrackClick(track)
+        }
         holder.tracksRecyclerView.adapter = trackAdapter
     }
 

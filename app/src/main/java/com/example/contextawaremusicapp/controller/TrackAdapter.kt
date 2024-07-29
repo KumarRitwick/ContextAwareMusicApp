@@ -11,7 +11,8 @@ import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.model.Track
 
 class TrackAdapter(
-    private var tracks: List<Track>
+    private var tracks: List<Track>,
+    private val onTrackClick: (Track) -> Unit
 ) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
     class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
@@ -35,6 +36,9 @@ class TrackAdapter(
                 .into(holder.albumImage)
         } else {
             holder.albumImage.setImageResource(R.drawable.placeholder_image)
+        }
+        holder.itemView.setOnClickListener {
+            onTrackClick(track)
         }
     }
 

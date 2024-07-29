@@ -15,6 +15,7 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.PlaylistAdapter
+import com.example.contextawaremusicapp.controller.TrackAdapter
 import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
@@ -30,6 +31,7 @@ class PlaylistFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
     private lateinit var adapter: PlaylistAdapter
+    private lateinit var trackAdapter: TrackAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -109,8 +111,8 @@ class PlaylistFragment : Fragment() {
                 if (response.isSuccessful) {
                     val trackItems = response.body()?.items ?: emptyList()
                     if (trackItems.isNotEmpty()) {
-                        val track = trackItems[0].track
-                        navigateToCurrentlyPlaying(track)
+                        val tracks = trackItems.map { it.track }
+                        showTracks(tracks)
                     } else {
                         Log.e("PlaylistFragment", "No tracks found in playlist")
                         Toast.makeText(context, "No tracks found in playlist", Toast.LENGTH_SHORT).show()
@@ -134,9 +136,20 @@ class PlaylistFragment : Fragment() {
         })
     }
 
-    private fun navigateToCurrentlyPlaying(track: Track) {
-        val action = PlaylistFragmentDirections.actionPlaylistsToCurrentlyPlaying(track)
-        findNavController().navigate(action)
+    private fun showTracks(tracks: List<Track>) {
+        trackAdapter = TrackAdapter(tracks) { track ->
+            playTrack(track)
+        }
+        recyclerView.adapter = trackAdapter
+    }
+
+    private fun playTrack(track: Track) {
+        SpotifyRemoteManager.play(track.uri, {
+            Toast.makeText(context, "Playing ${track.name}", Toast.LENGTH_SHORT).show()
+        }, { error ->
+            Log.e("PlaylistFragment", "Error playing track: ${error.message}")
+            Toast.makeText(context, "Error playing track", Toast.LENGTH_SHORT).show()
+        })
     }
 
     private fun getAccessToken(context: Context): String {

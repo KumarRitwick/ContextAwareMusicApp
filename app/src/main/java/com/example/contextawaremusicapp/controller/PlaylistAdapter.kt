@@ -12,7 +12,7 @@ import com.example.contextawaremusicapp.model.Playlist
 
 class PlaylistAdapter(
     private var playlists: List<Playlist>,
-    private val onItemClick: (String) -> Unit
+    private val onItemClick: (String) -> Unit // Change to accept only playlist URI
 ) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     class PlaylistViewHolder(view: View) : RecyclerView.ViewHolder(view) {

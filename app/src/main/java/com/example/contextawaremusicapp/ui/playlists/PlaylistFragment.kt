@@ -18,6 +18,8 @@ import com.example.contextawaremusicapp.controller.PlaylistAdapter
 import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
+import com.example.contextawaremusicapp.model.Track
+import com.example.contextawaremusicapp.model.TracksResponse
 import com.example.contextawaremusicapp.model.UserResponse
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import retrofit2.Call
@@ -38,7 +40,7 @@ class PlaylistFragment : Fragment() {
         recyclerView = view.findViewById(R.id.playlists_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = PlaylistAdapter(listOf()) { playlistUri ->
-            playPlaylist(playlistUri)
+            fetchPlaylistTracks(playlistUri)
         }
         recyclerView.adapter = adapter
 
@@ -99,8 +101,41 @@ class PlaylistFragment : Fragment() {
         })
     }
 
-    private fun playPlaylist(playlistUri: String) {
-        val action = PlaylistFragmentDirections.actionPlaylistsToSongDetail(playlistUri)
+    private fun fetchPlaylistTracks(playlistUri: String) {
+        val playlistId = playlistUri.split(":").lastOrNull() ?: return
+        val accessToken = getAccessToken(requireContext())
+        SpotifyApi.service.getPlaylistTracks("Bearer $accessToken", playlistId).enqueue(object : Callback<TracksResponse> {
+            override fun onResponse(call: Call<TracksResponse>, response: Response<TracksResponse>) {
+                if (response.isSuccessful) {
+                    val trackItems = response.body()?.items ?: emptyList()
+                    if (trackItems.isNotEmpty()) {
+                        val track = trackItems[0].track
+                        navigateToCurrentlyPlaying(track)
+                    } else {
+                        Log.e("PlaylistFragment", "No tracks found in playlist")
+                        Toast.makeText(context, "No tracks found in playlist", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    if (response.code() == 401) {
+                        refreshToken {
+                            fetchPlaylistTracks(playlistUri)
+                        }
+                    } else {
+                        Log.e("PlaylistFragment", "Error fetching playlist tracks: ${response.message()}")
+                        Toast.makeText(context, "Error fetching playlist tracks", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<TracksResponse>, t: Throwable) {
+                Log.e("PlaylistFragment", "API call failed: ${t.message}")
+                Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
+    private fun navigateToCurrentlyPlaying(track: Track) {
+        val action = PlaylistFragmentDirections.actionPlaylistsToCurrentlyPlaying(track)
         findNavController().navigate(action)
     }
 

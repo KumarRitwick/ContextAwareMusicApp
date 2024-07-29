@@ -2,9 +2,6 @@ package com.example.contextawaremusicapp.model
 
 import com.google.gson.annotations.SerializedName
 
-data class Image(
-    @SerializedName("url") val url: String
-)
 
 data class Playlist(
     @SerializedName("id") val id: String,

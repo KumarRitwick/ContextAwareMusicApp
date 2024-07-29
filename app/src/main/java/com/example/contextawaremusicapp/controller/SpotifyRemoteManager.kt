@@ -10,6 +10,8 @@ import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp
+import com.spotify.protocol.client.CallResult
+import com.spotify.protocol.types.PlayerState
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -66,6 +68,36 @@ object SpotifyRemoteManager {
         } ?: run {
             Log.e("SpotifyRemoteManager", "Spotify App Remote is not connected")
             onError(Throwable("Spotify App Remote is not connected"))
+        }
+    }
+
+    fun togglePlayPause(onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
+        spotifyAppRemote?.let {
+            it.playerApi.playerState.setResultCallback { playerState ->
+                if (playerState.isPaused) {
+                    it.playerApi.resume().setResultCallback {
+                        onSuccess()
+                    }.setErrorCallback {
+                        onError(it)
+                    }
+                } else {
+                    it.playerApi.pause().setResultCallback {
+                        onSuccess()
+                    }.setErrorCallback {
+                        onError(it)
+                    }
+                }
+            }.setErrorCallback {
+                onError(it)
+            }
+        }
+    }
+
+    fun getPlayerState(onSuccess: (PlayerState) -> Unit) {
+        spotifyAppRemote?.let {
+            it.playerApi.playerState.setResultCallback { playerState ->
+                onSuccess(playerState)
+            }
         }
     }
 

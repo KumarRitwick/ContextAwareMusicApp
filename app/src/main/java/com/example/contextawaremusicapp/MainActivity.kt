@@ -4,26 +4,30 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.LayoutInflater
+import android.view.View
+import android.widget.ImageButton
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.controller.AuthActivity
-import com.example.contextawaremusicapp.controller.PlaylistAdapter
-import com.example.contextawaremusicapp.model.Playlist
-import com.example.contextawaremusicapp.model.PlaylistsResponse
-import com.example.contextawaremusicapp.model.SpotifyApi
-import com.example.contextawaremusicapp.model.UserResponse
+import com.example.contextawaremusicapp.model.Track
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var currentlyPlayingImage: ImageView
+    private lateinit var currentlyPlayingTitle: TextView
+    private lateinit var currentlyPlayingArtist: TextView
+    private lateinit var playPauseButton: ImageButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,61 +47,46 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
         val bottomNavigationView = findViewById<BottomNavigationView>(R.id.bottom_navigation)
         NavigationUI.setupWithNavController(bottomNavigationView, navController)
-    }
 
-    private fun playPlaylist(playlistUri: String) {
-        Log.d("MainActivity", "Attempting to play playlist: $playlistUri")
-        SpotifyRemoteManager.play(playlistUri, {
-            Log.d("MainActivity", "Playing playlist: $playlistUri")
-        }, {
-            Log.e("MainActivity", "Error playing playlist: $playlistUri", it)
-        })
-    }
+        // Initialize Currently Playing Bar
+        val currentlyPlayingBar = LayoutInflater.from(this).inflate(R.layout.currently_playing_bar, findViewById(R.id.currently_playing_bar), true)
+        currentlyPlayingImage = currentlyPlayingBar.findViewById(R.id.currently_playing_image)
+        currentlyPlayingTitle = currentlyPlayingBar.findViewById(R.id.currently_playing_title)
+        currentlyPlayingArtist = currentlyPlayingBar.findViewById(R.id.currently_playing_artist)
+        playPauseButton = currentlyPlayingBar.findViewById(R.id.play_pause_button)
 
-    private fun fetchUserProfile(onResult: (String) -> Unit) {
-        val accessToken = getAccessToken(this)
-        Log.d("MainActivity", "Using Access Token: $accessToken")
-        if (accessToken.isNotEmpty()) {
-            SpotifyApi.service.getCurrentUser("Bearer $accessToken").enqueue(object : Callback<UserResponse> {
-                override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
-                    if (response.isSuccessful) {
-                        val userId = response.body()?.id ?: return
-                        onResult(userId)
-                    } else {
-                        Log.e("MainActivity", "Error fetching user ID: ${response.message()} Code: ${response.code()}")
-                        Log.e("MainActivity", "Response body: ${response.errorBody()?.string()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                    Log.e("MainActivity", "API call failed: ${t.message}")
-                }
+        playPauseButton.setOnClickListener {
+            SpotifyRemoteManager.togglePlayPause({
+                updatePlayPauseButton()
+            }, { error ->
+                Toast.makeText(this, "Error toggling play/pause: ${error.message}", Toast.LENGTH_SHORT).show()
             })
-        } else {
-            Log.e("MainActivity", "Access token is missing")
+        }
+
+        updateCurrentlyPlayingTrack()
+    }
+
+    fun updateCurrentlyPlayingTrack() {
+        SpotifyRemoteManager.getPlayerState { playerState ->
+            val track = playerState.track
+            currentlyPlayingTitle.text = track.name
+            currentlyPlayingArtist.text = track.artist.name
+            Glide.with(this)
+                .load(track.imageUri.raw)
+                .into(currentlyPlayingImage)
+            updatePlayPauseButton()
         }
     }
 
-    private fun fetchPlaylists(userId: String, onResult: (List<Playlist>) -> Unit) {
-        val accessToken = getAccessToken(this)
-        Log.d("MainActivity", "Using Access Token: $accessToken")
-        if (accessToken.isNotEmpty()) {
-            SpotifyApi.service.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
-                override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
-                    if (response.isSuccessful) {
-                        val playlists = response.body()?.playlists ?: emptyList()
-                        onResult(playlists)
-                    } else {
-                        Log.e("MainActivity", "Error fetching playlists: ${response.message()} Code: ${response.code()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<PlaylistsResponse>, t: Throwable) {
-                    Log.e("MainActivity", "API call failed: ${t.message}")
-                }
-            })
-        } else {
-            Log.e("MainActivity", "Access token is missing")
+    private fun updatePlayPauseButton() {
+        SpotifyRemoteManager.getPlayerState { playerState ->
+            val isPlaying = !playerState.isPaused
+            playPauseButton.setImageDrawable(
+                ContextCompat.getDrawable(
+                    this,
+                    if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow
+                )
+            )
         }
     }
 

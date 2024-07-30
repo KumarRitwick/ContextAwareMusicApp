@@ -8,9 +8,10 @@ import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
+import com.spotify.android.appremote.api.PlayerApi
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp
-import com.spotify.protocol.client.CallResult
+import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.PlayerState
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -24,6 +25,7 @@ object SpotifyRemoteManager {
     private const val REDIRECT_URI = "contextawaremusicapp://callback"
     private const val TOKEN_URL = "https://accounts.spotify.com/api/token"
     private var spotifyAppRemote: SpotifyAppRemote? = null
+    private var playerStateSubscription: Subscription<PlayerState>? = null
 
     fun connect(context: Context, onConnected: () -> Unit, onFailure: (Throwable) -> Unit) {
         val connectionParams = ConnectionParams.Builder(CLIENT_ID)
@@ -51,6 +53,7 @@ object SpotifyRemoteManager {
     }
 
     fun disconnect() {
+        playerStateSubscription?.cancel()
         spotifyAppRemote?.let {
             Log.d("SpotifyRemoteManager", "Disconnecting from Spotify App Remote")
             SpotifyAppRemote.disconnect(it)
@@ -72,32 +75,28 @@ object SpotifyRemoteManager {
     }
 
     fun togglePlayPause(onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
-        spotifyAppRemote?.let {
-            it.playerApi.playerState.setResultCallback { playerState ->
-                if (playerState.isPaused) {
-                    it.playerApi.resume().setResultCallback {
-                        onSuccess()
-                    }.setErrorCallback {
-                        onError(it)
-                    }
-                } else {
-                    it.playerApi.pause().setResultCallback {
-                        onSuccess()
-                    }.setErrorCallback {
-                        onError(it)
-                    }
+        spotifyAppRemote?.playerApi?.playerState?.setResultCallback { playerState ->
+            if (playerState.isPaused) {
+                spotifyAppRemote?.playerApi?.resume()?.setResultCallback {
+                    onSuccess()
+                }?.setErrorCallback {
+                    onError(it)
                 }
-            }.setErrorCallback {
-                onError(it)
+            } else {
+                spotifyAppRemote?.playerApi?.pause()?.setResultCallback {
+                    onSuccess()
+                }?.setErrorCallback {
+                    onError(it)
+                }
             }
+        } ?: run {
+            onError(Throwable("Spotify App Remote is not connected"))
         }
     }
 
-    fun getPlayerState(onSuccess: (PlayerState) -> Unit) {
-        spotifyAppRemote?.let {
-            it.playerApi.playerState.setResultCallback { playerState ->
-                onSuccess(playerState)
-            }
+    fun getPlayerState(onPlayerStateReceived: (PlayerState) -> Unit) {
+        playerStateSubscription = spotifyAppRemote?.playerApi?.subscribeToPlayerState()?.setEventCallback {
+            onPlayerStateReceived(it)
         }
     }
 

@@ -1,6 +1,5 @@
 package com.example.contextawaremusicapp.ui.currentlyplaying
 
-import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +7,15 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.model.Track
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
+import com.spotify.protocol.client.Subscription
+import com.spotify.protocol.types.PlayerState
 
 class CurrentlyPlayingFragment : Fragment() {
 
@@ -65,8 +67,10 @@ class CurrentlyPlayingFragment : Fragment() {
     }
 
     private fun updatePlayPauseButton() {
-        SpotifyRemoteManager.getPlayerState { playerState ->
+        SpotifyRemoteManager.getPlayerState({ playerState ->
             playPauseButton.text = if (playerState.isPaused) "Play" else "Pause"
-        }
+        }, { error ->
+            Toast.makeText(context, "Error retrieving player state: ${error.message}", Toast.LENGTH_SHORT).show()
+        })
     }
 }

@@ -8,18 +8,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.PlaylistAdapter
 import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.model.UserResponse
-import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -27,7 +26,7 @@ import retrofit2.Response
 class PlaylistFragment : Fragment() {
 
     private lateinit var recyclerView: RecyclerView
-    private lateinit var adapter: PlaylistAdapter
+    private lateinit var playlistAdapter: PlaylistAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,14 +36,22 @@ class PlaylistFragment : Fragment() {
 
         recyclerView = view.findViewById(R.id.playlists_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        adapter = PlaylistAdapter(listOf()) { playlistUri ->
-            playPlaylist(playlistUri)
+
+        playlistAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            // Navigate to PlaylistDetailFragment
+            val action = PlaylistFragmentDirections.actionPlaylistFragmentToPlaylistDetailFragment(playlist.uri)
+            findNavController().navigate(action)
         }
-        recyclerView.adapter = adapter
+        recyclerView.adapter = playlistAdapter
 
         fetchUserPlaylists()
 
         return view
+    }
+
+    private fun getAccessToken(context: Context): String {
+        val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("ACCESS_TOKEN", "") ?: ""
     }
 
     private fun fetchUserPlaylists() {
@@ -52,17 +59,29 @@ class PlaylistFragment : Fragment() {
         SpotifyApi.service.getCurrentUser("Bearer $accessToken").enqueue(object : Callback<UserResponse> {
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
                 if (response.isSuccessful) {
-                    val userId = response.body()?.id ?: return
-                    fetchPlaylists(userId)
-                } else {
-                    if (response.code() == 401) {
-                        refreshToken {
-                            fetchUserPlaylists()
-                        }
-                    } else {
-                        Log.e("PlaylistFragment", "Error fetching user ID: ${response.message()}")
-                        Toast.makeText(context, "Error fetching user ID", Toast.LENGTH_SHORT).show()
+                    val userId = response.body()?.id
+                    if (userId != null) {
+                        // Fetch the user's playlists
+                        SpotifyApi.service.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
+                            override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
+                                if (response.isSuccessful) {
+                                    val playlists = response.body()?.playlists ?: emptyList()
+                                    playlistAdapter.updatePlaylists(playlists)
+                                } else {
+                                    Log.e("PlaylistFragment", "Error fetching playlists: ${response.message()}")
+                                    Toast.makeText(context, "Error fetching playlists", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
+                            override fun onFailure(call: Call<PlaylistsResponse>, t: Throwable) {
+                                Log.e("PlaylistFragment", "API call failed: ${t.message}")
+                                Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        })
                     }
+                } else {
+                    Log.e("PlaylistFragment", "Error fetching user ID: ${response.message()}")
+                    Toast.makeText(context, "Error fetching user ID", Toast.LENGTH_SHORT).show()
                 }
             }
 
@@ -70,62 +89,6 @@ class PlaylistFragment : Fragment() {
                 Log.e("PlaylistFragment", "API call failed: ${t.message}")
                 Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
             }
-        })
-    }
-
-    private fun fetchPlaylists(userId: String) {
-        val accessToken = getAccessToken(requireContext())
-        SpotifyApi.service.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
-            override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
-                if (response.isSuccessful) {
-                    val playlists = response.body()?.playlists ?: emptyList()
-                    adapter.updateTracks(playlists)
-                } else {
-                    if (response.code() == 401) {
-                        refreshToken {
-                            fetchPlaylists(userId)
-                        }
-                    } else {
-                        Log.e("PlaylistFragment", "Error fetching playlists: ${response.message()} Code: ${response.code()}")
-                        Toast.makeText(context, "Error fetching playlists", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-
-            override fun onFailure(call: Call<PlaylistsResponse>, t: Throwable) {
-                Log.e("PlaylistFragment", "API call failed: ${t.message}")
-                Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
-            }
-        })
-    }
-
-    private fun playPlaylist(playlistUri: String) {
-        val action = PlaylistFragmentDirections.actionPlaylistsToSongDetail(playlistUri)
-        findNavController().navigate(action)
-    }
-
-    private fun getAccessToken(context: Context): String {
-        val masterKeyAlias = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        val sharedPreferences = EncryptedSharedPreferences.create(
-            context,
-            "SpotifyCredential",
-            masterKeyAlias,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
-
-        return sharedPreferences.getString("ACCESS_TOKEN", "") ?: ""
-    }
-
-    private fun refreshToken(onTokenRefreshed: () -> Unit) {
-        SpotifyRemoteManager.refreshToken(requireContext(), { newToken ->
-            onTokenRefreshed()
-        }, { error ->
-            Log.e("PlaylistFragment", "Error refreshing token", error)
-            Toast.makeText(context, "Error refreshing token", Toast.LENGTH_SHORT).show()
         })
     }
 }

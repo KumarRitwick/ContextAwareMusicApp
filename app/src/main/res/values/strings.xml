@@ -7,4 +7,6 @@
     <string name="playlist_image">Playlist Image</string>
     <string name="album_art">Album Art</string>
     <string name="album_art_desc">Album Art</string>
+    <string name="playlist_image_desc">Playlist Image Description</string>
+    <string name="title_playlist_detail">Title Playlist Detail</string>
 </resources>

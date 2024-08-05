@@ -7,7 +7,8 @@ data class Track(
     @SerializedName("name") val name: String,
     @SerializedName("artists") val artists: List<Artist>,
     @SerializedName("album") val album: Album,
-    @SerializedName("duration_ms") val durationMs: Int
+    @SerializedName("duration_ms") val durationMs: Int,
+    @SerializedName("uri") val uri: String
 )
 
 data class Artist(

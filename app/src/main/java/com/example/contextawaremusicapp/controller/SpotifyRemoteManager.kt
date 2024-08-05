@@ -10,6 +10,10 @@ import com.spotify.android.appremote.api.ConnectionParams
 import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp
+import com.spotify.protocol.client.CallResult
+import com.spotify.protocol.types.PlayerState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -55,26 +59,28 @@ object SpotifyRemoteManager {
         }
     }
 
-    fun play(uri: String, onSuccess: () -> Unit, onError: (Throwable) -> Unit) {
-        Log.d("SpotifyRemoteManager", "Attempting to play URI: $uri")
-        spotifyAppRemote?.playerApi?.play(uri)?.setResultCallback {
-            Log.d("SpotifyRemoteManager", "Successfully started playing URI: $uri")
-            onSuccess()
-        }?.setErrorCallback {
-            Log.e("SpotifyRemoteManager", "Error playing URI: $uri", it)
-            onError(it)
-        } ?: run {
-            Log.e("SpotifyRemoteManager", "Spotify App Remote is not connected")
-            onError(Throwable("Spotify App Remote is not connected"))
-        }
+    suspend fun playTrack(trackUri: String) = withContext(Dispatchers.IO) {
+        spotifyAppRemote?.playerApi?.play(trackUri)
     }
 
-    private fun promptInstallSpotify(context: Context) {
-        val intent = Intent(Intent.ACTION_VIEW).apply {
-            data = Uri.parse("https://play.google.com/store/apps/details?id=com.spotify.music")
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+    suspend fun pausePlayback() = withContext(Dispatchers.IO) {
+        spotifyAppRemote?.playerApi?.pause()
+    }
+
+    suspend fun resumePlayback() = withContext(Dispatchers.IO) {
+        spotifyAppRemote?.playerApi?.resume()
+    }
+
+    suspend fun getPlayerState(): PlayerState? = withContext(Dispatchers.IO) {
+        spotifyAppRemote?.playerApi?.playerState?.awaitOrNull()
+    }
+
+    private suspend fun <T> CallResult<T>.awaitOrNull(): T? {
+        return try {
+            this.await().data
+        } catch (e: Exception) {
+            null
         }
-        context.startActivity(intent)
     }
 
     fun refreshToken(context: Context, onTokenRefreshed: (String) -> Unit, onError: (Throwable) -> Unit) {
@@ -131,4 +137,20 @@ object SpotifyRemoteManager {
             }
         })
     }
+
+    private fun promptInstallSpotify(context: Context) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            data = Uri.parse("https://play.google.com/store/apps/details?id=com.spotify.music")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        context.startActivity(intent)
+    }
+
+    fun observeTrackChanges(onTrackChanged: (String) -> Unit) {
+        spotifyAppRemote?.playerApi?.subscribeToPlayerState()?.setEventCallback { playerState ->
+            val trackName = playerState.track?.name ?: "Unknown Track"
+            onTrackChanged(trackName)
+        }
+    }
+
 }

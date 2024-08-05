@@ -10,13 +10,9 @@ import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.model.Track
 
 class GenreSectionAdapter(
-    private val genreSections: List<GenreSection>
+    private val genreSections: List<GenreSection>,
+    private val onTrackClick: (Track) -> Unit // Adding the lambda parameter
 ) : RecyclerView.Adapter<GenreSectionAdapter.GenreSectionViewHolder>() {
-
-    class GenreSectionViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val genreTitle: TextView = view.findViewById(R.id.genre_title)
-        val tracksRecyclerView: RecyclerView = view.findViewById(R.id.tracks_recycler_view)
-    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenreSectionViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_genre_section, parent, false)
@@ -25,14 +21,22 @@ class GenreSectionAdapter(
 
     override fun onBindViewHolder(holder: GenreSectionViewHolder, position: Int) {
         val genreSection = genreSections[position]
-        holder.genreTitle.text = genreSection.genre
-
-        holder.tracksRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context, LinearLayoutManager.HORIZONTAL, false)
-        val trackAdapter = TrackAdapter(genreSection.tracks)
-        holder.tracksRecyclerView.adapter = trackAdapter
+        holder.bind(genreSection)
     }
 
-    override fun getItemCount() = genreSections.size
+    override fun getItemCount(): Int = genreSections.size
+
+    inner class GenreSectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val genreTitle: TextView = itemView.findViewById(R.id.genre_title)
+        private val tracksRecyclerView: RecyclerView = itemView.findViewById(R.id.tracks_recycler_view)
+
+        fun bind(genreSection: GenreSection) {
+            genreTitle.text = genreSection.genre
+            tracksRecyclerView.layoutManager = LinearLayoutManager(itemView.context, LinearLayoutManager.HORIZONTAL, false)
+            val trackAdapter = TrackAdapter(genreSection.tracks, onTrackClick)
+            tracksRecyclerView.adapter = trackAdapter
+        }
+    }
 }
 
 data class GenreSection(

@@ -10,6 +10,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -23,6 +24,7 @@ import com.example.contextawaremusicapp.model.Track
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.model.TracksResponse
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -49,7 +51,11 @@ class SongDetailFragment : Fragment() {
         tracksRecyclerView = view.findViewById(R.id.tracks_recycler_view)
 
         tracksRecyclerView.layoutManager = LinearLayoutManager(context)
-        trackAdapter = TrackAdapter(listOf())
+        trackAdapter = TrackAdapter(listOf()) { track ->
+            viewLifecycleOwner.lifecycleScope.launch {
+                SpotifyRemoteManager.playTrack(track.uri)
+            }
+        }
         tracksRecyclerView.adapter = trackAdapter
 
         val playlistId = args.playlistUri.split(":").lastOrNull()

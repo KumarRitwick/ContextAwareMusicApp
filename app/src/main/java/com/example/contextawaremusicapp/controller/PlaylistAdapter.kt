@@ -5,7 +5,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.R
@@ -13,12 +12,11 @@ import com.example.contextawaremusicapp.model.Playlist
 
 class PlaylistAdapter(
     private var playlists: List<Playlist>,
-    private val onItemClick: (String) -> Unit
+    private val onPlaylistClick: (Playlist) -> Unit
 ) : RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder>() {
 
     class PlaylistViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val playlistName: TextView = view.findViewById(R.id.playlistName)
-        val playlistDescription: TextView = view.findViewById(R.id.playlistDescription)
         val playlistImage: ImageView = view.findViewById(R.id.playlistImage)
     }
 
@@ -30,20 +28,22 @@ class PlaylistAdapter(
     override fun onBindViewHolder(holder: PlaylistViewHolder, position: Int) {
         val playlist = playlists[position]
         holder.playlistName.text = playlist.name
-        holder.playlistDescription.text = playlist.description
         if (playlist.images.isNotEmpty()) {
             Glide.with(holder.playlistImage.context)
                 .load(playlist.images[0].url)
                 .into(holder.playlistImage)
+        } else {
+            holder.playlistImage.setImageResource(R.drawable.placeholder_image)
         }
+
         holder.itemView.setOnClickListener {
-            onItemClick(playlist.uri)
+            onPlaylistClick(playlist)
         }
     }
 
     override fun getItemCount() = playlists.size
 
-    fun updateTracks(newPlaylists: List<Playlist>) {
+    fun updatePlaylists(newPlaylists: List<Playlist>) {
         playlists = newPlaylists
         notifyDataSetChanged()
     }

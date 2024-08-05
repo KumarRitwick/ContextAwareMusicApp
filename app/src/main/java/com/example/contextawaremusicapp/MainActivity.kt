@@ -4,26 +4,33 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.ImageButton
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.contextawaremusicapp.controller.AuthActivity
-import com.example.contextawaremusicapp.controller.PlaylistAdapter
 import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.model.UserResponse
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
+
+    private lateinit var playbackBar: View
+    private lateinit var currentTrackName: TextView
+    private lateinit var playPauseButton: ImageButton
+    private var isPlaying: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +43,25 @@ class MainActivity : AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
 
-        // Setup Bottom Navigation
+        setupUI()
+        setupNavigation()
+    }
+
+    private fun setupUI() {
+        playbackBar = findViewById(R.id.playback_bar)
+        currentTrackName = findViewById(R.id.current_track_name)
+        playPauseButton = findViewById(R.id.play_pause_button)
+
+        playPauseButton.setOnClickListener {
+            if (isPlaying) {
+                pauseTrack()
+            } else {
+                resumeTrack()
+            }
+        }
+    }
+
+    private fun setupNavigation() {
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
             ?: throw IllegalStateException("NavHostFragment not found")
@@ -45,13 +70,47 @@ class MainActivity : AppCompatActivity() {
         NavigationUI.setupWithNavController(bottomNavigationView, navController)
     }
 
-    private fun playPlaylist(playlistUri: String) {
+    fun playPlaylist(playlistUri: String) {
         Log.d("MainActivity", "Attempting to play playlist: $playlistUri")
-        SpotifyRemoteManager.play(playlistUri, {
-            Log.d("MainActivity", "Playing playlist: $playlistUri")
-        }, {
-            Log.e("MainActivity", "Error playing playlist: $playlistUri", it)
-        })
+        lifecycleScope.launch {
+            try {
+                SpotifyRemoteManager.playTrack(playlistUri)
+                isPlaying = true
+                updatePlaybackBar("Playing playlist...", isPlaying)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error playing playlist: $playlistUri", e)
+            }
+        }
+    }
+
+    private fun pauseTrack() {
+        lifecycleScope.launch {
+            try {
+                SpotifyRemoteManager.pausePlayback()
+                isPlaying = false
+                updatePlaybackBar(currentTrackName.text.toString(), isPlaying)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error pausing track", e)
+            }
+        }
+    }
+
+    private fun resumeTrack() {
+        lifecycleScope.launch {
+            try {
+                SpotifyRemoteManager.resumePlayback()
+                isPlaying = true
+                updatePlaybackBar(currentTrackName.text.toString(), isPlaying)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error resuming track", e)
+            }
+        }
+    }
+
+    private fun updatePlaybackBar(trackName: String, isPlaying: Boolean) {
+        currentTrackName.text = trackName
+        playPauseButton.setImageResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
+        playbackBar.visibility = View.VISIBLE
     }
 
     private fun fetchUserProfile(onResult: (String) -> Unit) {
@@ -101,7 +160,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun getAccessToken(context: Context): String {
+    fun getAccessToken(context: Context): String {
         Log.d("getAccessToken", "Attempting to retrieve access token")
         val masterKeyAlias = MasterKey.Builder(context)
             .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
@@ -146,6 +205,11 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         SpotifyRemoteManager.connect(this, {
             Log.d("MainActivity", "Connected to Spotify App Remote")
+
+            // Observe track changes
+            SpotifyRemoteManager.observeTrackChanges { trackName ->
+                updatePlaybackBar(trackName, isPlaying = true)
+            }
         }, { throwable ->
             Log.e("MainActivity", "Failed to connect to Spotify App Remote", throwable)
         })

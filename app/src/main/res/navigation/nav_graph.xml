@@ -17,12 +17,22 @@
         android:label="@string/title_playlists"
         tools:layout="@layout/fragment_playlists">
         <action
-            android:id="@+id/action_playlists_to_song_detail"
-            app:destination="@id/navigation_song_detail">
+            android:id="@+id/action_playlistFragment_to_playlistDetailFragment"
+            app:destination="@id/navigation_playlist_detail">
             <argument
                 android:name="playlistUri"
                 app:argType="string" />
         </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_playlist_detail"
+        android:name="com.example.contextawaremusicapp.ui.playlistdetail.PlaylistDetailFragment"
+        android:label="@string/title_playlist_detail"
+        tools:layout="@layout/fragment_playlist_detail">
+        <argument
+            android:name="playlistUri"
+            app:argType="string" />
     </fragment>
 
     <fragment
@@ -34,4 +44,5 @@
             android:name="playlistUri"
             app:argType="string" />
     </fragment>
+
 </navigation>

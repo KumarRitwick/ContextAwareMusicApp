@@ -10,6 +10,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.contextawaremusicapp.MainActivity
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.GenreSection
 import com.example.contextawaremusicapp.controller.GenreSectionAdapter
@@ -51,7 +52,9 @@ class HomeFragment : Fragment() {
                         val tracks = response.body()?.tracks ?: emptyList()
                         genreSections.add(GenreSection(genre, tracks))
                         if (genreSections.size == genres.size) {
-                            genreSectionAdapter = GenreSectionAdapter(genreSections)
+                            genreSectionAdapter = GenreSectionAdapter(genreSections) { track ->
+                                (activity as MainActivity).playPlaylist(track.uri)
+                            }
                             recyclerView.adapter = genreSectionAdapter
                         }
                     } else {

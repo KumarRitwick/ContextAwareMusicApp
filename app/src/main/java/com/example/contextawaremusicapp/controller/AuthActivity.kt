@@ -66,10 +66,10 @@ class AuthActivity : AppCompatActivity() {
             Toast.makeText(this, "Authentication service unavailable. Retrying...", Toast.LENGTH_SHORT).show()
             Handler(Looper.getMainLooper()).postDelayed({
                 startAuthorization()
-            }, 3000) // Retry after 3 seconds
+            }, 3000)
         } else {
             Toast.makeText(this, "Authentication failed: $error", Toast.LENGTH_LONG).show()
-            retryCount = 0 // Reset retry count on failure
+            retryCount = 0
         }
     }
 

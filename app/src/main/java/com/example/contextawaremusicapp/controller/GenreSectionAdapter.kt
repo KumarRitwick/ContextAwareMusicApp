@@ -10,8 +10,8 @@ import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.model.Track
 
 class GenreSectionAdapter(
-    private val genreSections: List<GenreSection>,
-    private val onTrackClick: (Track) -> Unit // Adding the lambda parameter
+    private var genreSections: List<GenreSection>,
+    private val onTrackClick: (Track) -> Unit
 ) : RecyclerView.Adapter<GenreSectionAdapter.GenreSectionViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GenreSectionViewHolder {
@@ -25,6 +25,11 @@ class GenreSectionAdapter(
     }
 
     override fun getItemCount(): Int = genreSections.size
+
+    fun updateGenreSections(newGenreSections: List<GenreSection>) {
+        genreSections = newGenreSections
+        notifyDataSetChanged()
+    }
 
     inner class GenreSectionViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val genreTitle: TextView = itemView.findViewById(R.id.genre_title)

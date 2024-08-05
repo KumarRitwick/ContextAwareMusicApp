@@ -25,8 +25,10 @@ import retrofit2.Response
 
 class PlaylistFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var playlistAdapter: PlaylistAdapter
+    private lateinit var userPlaylistsRecyclerView: RecyclerView
+    private lateinit var recommendationsRecyclerView: RecyclerView
+    private lateinit var userPlaylistAdapter: PlaylistAdapter
+    private lateinit var recommendationsAdapter: PlaylistAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -34,17 +36,28 @@ class PlaylistFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_playlists, container, false)
 
-        recyclerView = view.findViewById(R.id.playlists_recycler_view)
-        recyclerView.layoutManager = LinearLayoutManager(context)
+        userPlaylistsRecyclerView = view.findViewById(R.id.user_playlists_recycler_view)
+        recommendationsRecyclerView = view.findViewById(R.id.recommendations_recycler_view)
 
-        playlistAdapter = PlaylistAdapter(emptyList()) { playlist ->
+        userPlaylistsRecyclerView.layoutManager = LinearLayoutManager(context)
+        recommendationsRecyclerView.layoutManager = LinearLayoutManager(context)
+
+        userPlaylistAdapter = PlaylistAdapter(emptyList()) { playlist ->
             // Navigate to PlaylistDetailFragment
             val action = PlaylistFragmentDirections.actionPlaylistFragmentToPlaylistDetailFragment(playlist.uri)
             findNavController().navigate(action)
         }
-        recyclerView.adapter = playlistAdapter
+        recommendationsAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            // Navigate to PlaylistDetailFragment or play directly
+            val action = PlaylistFragmentDirections.actionPlaylistFragmentToPlaylistDetailFragment(playlist.uri)
+            findNavController().navigate(action)
+        }
+
+        userPlaylistsRecyclerView.adapter = userPlaylistAdapter
+        recommendationsRecyclerView.adapter = recommendationsAdapter
 
         fetchUserPlaylists()
+        fetchFeaturedPlaylists()
 
         return view
     }
@@ -66,7 +79,7 @@ class PlaylistFragment : Fragment() {
                             override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
                                 if (response.isSuccessful) {
                                     val playlists = response.body()?.playlists ?: emptyList()
-                                    playlistAdapter.updatePlaylists(playlists)
+                                    userPlaylistAdapter.updatePlaylists(playlists)
                                 } else {
                                     Log.e("PlaylistFragment", "Error fetching playlists: ${response.message()}")
                                     Toast.makeText(context, "Error fetching playlists", Toast.LENGTH_SHORT).show()
@@ -91,4 +104,26 @@ class PlaylistFragment : Fragment() {
             }
         })
     }
+
+    private fun fetchFeaturedPlaylists() {
+        val accessToken = getAccessToken(requireContext())
+        SpotifyApi.service.getFeaturedPlaylists("Bearer $accessToken").enqueue(object : Callback<PlaylistsResponse> {
+            override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
+                if (response.isSuccessful) {
+                    val playlists = response.body()?.playlists ?: emptyList()
+                    Log.d("PlaylistFragment", "Featured Playlists: ${playlists.size}")
+                    recommendationsAdapter.updatePlaylists(playlists)
+                } else {
+                    Log.e("PlaylistFragment", "Error fetching featured playlists: ${response.message()}")
+                    Toast.makeText(context, "Error fetching featured playlists", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onFailure(call: Call<PlaylistsResponse>, t: Throwable) {
+                Log.e("PlaylistFragment", "API call failed: ${t.message}")
+                Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
 }

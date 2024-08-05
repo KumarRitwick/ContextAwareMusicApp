@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <ImageView
+        android:id="@+id/audiobook_cover"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="@string/audiobook_cover_desc"/>
+
+    <TextView
+        android:id="@+id/audiobook_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Audiobook Title"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:paddingTop="4dp" />
+
+    <TextView
+        android:id="@+id/audiobook_author"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Author Name"
+        android:textSize="12sp"
+        android:paddingTop="2dp" />
+
+</LinearLayout>

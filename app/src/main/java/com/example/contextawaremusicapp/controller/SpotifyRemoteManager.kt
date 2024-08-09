@@ -26,7 +26,7 @@ object SpotifyRemoteManager {
     private const val CLIENT_SECRET = "ad760e57f4de4a619fbaadadb9685e55"
     private const val REDIRECT_URI = "contextawaremusicapp://callback"
     private const val TOKEN_URL = "https://accounts.spotify.com/api/token"
-    private var spotifyAppRemote: SpotifyAppRemote? = null
+    var spotifyAppRemote: SpotifyAppRemote? = null
 
     fun connect(context: Context, onConnected: () -> Unit, onFailure: (Throwable) -> Unit) {
         val connectionParams = ConnectionParams.Builder(CLIENT_ID)

@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import com.spotify.protocol.client.Subscription
+import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.PlayerState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -94,16 +95,18 @@ class PlayerScreenFragment : Fragment() {
         trackTitle.text = playerState.track.name
         artistName.text = playerState.track.artist.name
 
-        playerState.track.imageUri.raw?.let { imageUri ->
-            if (imageUri.isNotEmpty()) {
-                Glide.with(this)
-                    .load(imageUri)
-                    .into(albumArt)
-            } else {
+        val imageUri: ImageUri = playerState.track.imageUri
+
+        if (imageUri.raw?.isNotEmpty() == true) {
+            SpotifyRemoteManager.spotifyAppRemote?.imagesApi?.getImage(imageUri)?.setResultCallback { bitmap ->
+                albumArt.setImageBitmap(bitmap)
+            }?.setErrorCallback {
+                // Handle the error if the image fails to load
                 albumArt.setImageResource(R.drawable.placeholder_image)
             }
-        } ?: albumArt.setImageResource(R.drawable.placeholder_image)
-
+        } else {
+            albumArt.setImageResource(R.drawable.placeholder_image)
+        }
 
         trackProgress.max = playerState.track.duration.toInt()
         trackProgress.progress = playerState.playbackPosition.toInt()
@@ -120,9 +123,10 @@ class PlayerScreenFragment : Fragment() {
         }
 
         if (playerState.isPaused) {
-            playPauseButton.setImageResource(R.drawable.ic_play)
+            playPauseButton.setImageResource(R.drawable.ic_play_black)
         } else {
-            playPauseButton.setImageResource(R.drawable.ic_pause)
+            playPauseButton.setImageResource(R.drawable.ic_pause_black)
         }
     }
+
 }

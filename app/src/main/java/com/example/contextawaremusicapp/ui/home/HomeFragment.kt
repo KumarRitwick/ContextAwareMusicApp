@@ -101,13 +101,22 @@ class HomeFragment : Fragment() {
 
     private fun fetchAudiobooksByIds() {
         val accessToken = getAccessToken(requireContext())
-        val audiobookIds = "18yVqkdbdRvS24c0Ilj2ci,1HGw3J3NxZO1TP1BTtVhpZ,7iHfbu1YPACw6oZPAFJtqe"
+        val audiobookIds = "1QE2T94jOEXHUzw9t1bcOi,6dQDjeIzHGxg1Fy2Esr1Hb,5pveT2lEIPURW8nIzJrHvz,2kjaFU9MKm5WSJzjp1zYq8,0XJcPs6GB3FhRRStoUbCuL"
+
         SpotifyApi.service.getAudiobooksByIds("Bearer $accessToken", audiobookIds).enqueue(object : Callback<AudiobooksResponse> {
             override fun onResponse(call: Call<AudiobooksResponse>, response: Response<AudiobooksResponse>) {
                 if (response.isSuccessful) {
-                    val audiobooks = response.body()?.audiobooks ?: emptyList()
-                    Log.d("HomeFragment", "Audiobooks retrieved: ${audiobooks.size}")
-                    audiobookAdapter.updateAudiobooks(audiobooks)
+                    val audiobooks = response.body()?.audiobooks
+                        ?.filterNotNull()
+                        ?.filter { it.images.isNotEmpty() } ?: emptyList()
+
+                    Log.d("HomeFragment", "Audiobooks retrieved with album art: ${audiobooks.size}")
+
+                    if (audiobooks.isNotEmpty()) {
+                        audiobookAdapter.updateAudiobooks(audiobooks)
+                    } else {
+                        Log.e("HomeFragment", "No valid audiobooks with album art found")
+                    }
                 } else {
                     Log.e("HomeFragment", "Error fetching audiobooks: ${response.message()} - ${response.errorBody()?.string()}")
                     Toast.makeText(context, "Error fetching audiobooks", Toast.LENGTH_SHORT).show()
@@ -122,6 +131,7 @@ class HomeFragment : Fragment() {
             }
         })
     }
+
 
     private fun getAccessToken(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)

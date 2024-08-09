@@ -7,7 +7,8 @@ data class Audiobook(
     val name: String,
     val authors: List<Author>,
     val images: List<Image>,
-    val description: String
+    val description: String,
+    val uri: String
 )
 
 data class Author(

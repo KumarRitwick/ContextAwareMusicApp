@@ -22,13 +22,15 @@ class AudiobookAdapter(
 
     override fun onBindViewHolder(holder: AudiobookViewHolder, position: Int) {
         val audiobook = audiobooks[position]
-        holder.bind(audiobook)
+        if (audiobook != null) {
+            holder.bind(audiobook)
+        }
     }
 
     override fun getItemCount(): Int = audiobooks.size
 
     fun updateAudiobooks(newAudiobooks: List<Audiobook>) {
-        audiobooks = newAudiobooks
+        audiobooks = newAudiobooks.filterNotNull()
         notifyDataSetChanged()
     }
 
@@ -38,8 +40,8 @@ class AudiobookAdapter(
         private val coverImageView: ImageView = itemView.findViewById(R.id.audiobook_cover)
 
         fun bind(audiobook: Audiobook) {
-            titleTextView.text = audiobook.name
-            authorTextView.text = audiobook.authors.joinToString { it.name }
+            titleTextView.text = audiobook.name ?: "Unknown Title"
+            authorTextView.text = audiobook.authors.joinToString { it.name } ?: "Unknown Author"
             if (audiobook.images.isNotEmpty()) {
                 Glide.with(itemView.context)
                     .load(audiobook.images[0].url)

@@ -21,6 +21,8 @@ import com.example.contextawaremusicapp.model.UserResponse
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -58,6 +60,13 @@ class MainActivity : AppCompatActivity() {
             } else {
                 resumeTrack()
             }
+        }
+
+        playbackBar.setOnClickListener {
+            val navHostFragment = supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+            val navController = navHostFragment?.navController
+            navController?.navigate(R.id.navigation_player_screen)
         }
     }
 
@@ -113,53 +122,6 @@ class MainActivity : AppCompatActivity() {
         playbackBar.visibility = View.VISIBLE
     }
 
-    private fun fetchUserProfile(onResult: (String) -> Unit) {
-        val accessToken = getAccessToken(this)
-        Log.d("MainActivity", "Using Access Token: $accessToken")
-        if (accessToken.isNotEmpty()) {
-            SpotifyApi.service.getCurrentUser("Bearer $accessToken").enqueue(object : Callback<UserResponse> {
-                override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
-                    if (response.isSuccessful) {
-                        val userId = response.body()?.id ?: return
-                        onResult(userId)
-                    } else {
-                        Log.e("MainActivity", "Error fetching user ID: ${response.message()} Code: ${response.code()}")
-                        Log.e("MainActivity", "Response body: ${response.errorBody()?.string()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<UserResponse>, t: Throwable) {
-                    Log.e("MainActivity", "API call failed: ${t.message}")
-                }
-            })
-        } else {
-            Log.e("MainActivity", "Access token is missing")
-        }
-    }
-
-    private fun fetchPlaylists(userId: String, onResult: (List<Playlist>) -> Unit) {
-        val accessToken = getAccessToken(this)
-        Log.d("MainActivity", "Using Access Token: $accessToken")
-        if (accessToken.isNotEmpty()) {
-            SpotifyApi.service.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
-                override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
-                    if (response.isSuccessful) {
-                        val playlists = response.body()?.playlists ?: emptyList()
-                        onResult(playlists)
-                    } else {
-                        Log.e("MainActivity", "Error fetching playlists: ${response.message()} Code: ${response.code()}")
-                    }
-                }
-
-                override fun onFailure(call: Call<PlaylistsResponse>, t: Throwable) {
-                    Log.e("MainActivity", "API call failed: ${t.message}")
-                }
-            })
-        } else {
-            Log.e("MainActivity", "Access token is missing")
-        }
-    }
-
     fun getAccessToken(context: Context): String {
         Log.d("getAccessToken", "Attempting to retrieve access token")
         val masterKeyAlias = MasterKey.Builder(context)
@@ -213,6 +175,19 @@ class MainActivity : AppCompatActivity() {
         }, { throwable ->
             Log.e("MainActivity", "Failed to connect to Spotify App Remote", throwable)
         })
+    }
+
+    fun playAudiobook(audiobookUri: String) {
+        Log.d("MainActivity", "Attempting to play audiobook: $audiobookUri")
+        lifecycleScope.launch {
+            try {
+                SpotifyRemoteManager.playTrack(audiobookUri)
+                isPlaying = true
+                updatePlaybackBar("Playing audiobook...", isPlaying)
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Error playing audiobook: $audiobookUri", e)
+            }
+        }
     }
 
     override fun onStop() {

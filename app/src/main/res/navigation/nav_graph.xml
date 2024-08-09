@@ -45,4 +45,12 @@
             app:argType="string" />
     </fragment>
 
+    <!-- Add your new PlayerScreenFragment here -->
+    <fragment
+        android:id="@+id/navigation_player_screen"
+        android:name="com.example.contextawaremusicapp.ui.player.PlayerScreenFragment"
+        android:label="Player Screen"
+        tools:layout="@layout/fragment_player_screen">
+    </fragment>
+
 </navigation>

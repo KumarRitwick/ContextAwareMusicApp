@@ -11,6 +11,7 @@ import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.android.appremote.api.error.CouldNotFindSpotifyApp
 import com.spotify.protocol.client.CallResult
+import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.PlayerState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -69,6 +70,30 @@ object SpotifyRemoteManager {
 
     suspend fun resumePlayback() = withContext(Dispatchers.IO) {
         spotifyAppRemote?.playerApi?.resume()
+    }
+
+    fun skipToNext() {
+        spotifyAppRemote?.playerApi?.skipNext()
+    }
+
+    fun skipToPrevious() {
+        spotifyAppRemote?.playerApi?.skipPrevious()
+    }
+
+    fun togglePlayPause() {
+        spotifyAppRemote?.let {
+            it.playerApi?.playerState?.setResultCallback { playerState ->
+                if (playerState.isPaused) {
+                    it.playerApi?.resume()
+                } else {
+                    it.playerApi?.pause()
+                }
+            }
+        }
+    }
+
+    fun seekTo(position: Long) {
+        spotifyAppRemote?.playerApi?.seekTo(position)
     }
 
     suspend fun getPlayerState(): PlayerState? = withContext(Dispatchers.IO) {
@@ -153,4 +178,7 @@ object SpotifyRemoteManager {
         }
     }
 
+    fun subscribeToPlayerState(onPlayerStateChanged: (PlayerState) -> Unit): Subscription<PlayerState>? {
+        return spotifyAppRemote?.playerApi?.subscribeToPlayerState()?.setEventCallback(onPlayerStateChanged)
+    }
 }

@@ -59,7 +59,8 @@ interface SpotifyService {
     ): Call<PlaylistsResponse>
 
     @GET("v1/audiobooks")
-    fun getAudiobooks(
-        @Header("Authorization") token: String
+    fun getAudiobooksByIds(
+        @Header("Authorization") authHeader: String,
+        @Query("ids") ids: String
     ): Call<AudiobooksResponse>
 }

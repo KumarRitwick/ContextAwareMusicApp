@@ -60,6 +60,7 @@ class HomeFragment : Fragment() {
         }
         audiobookAdapter = AudiobookAdapter(emptyList()) { audiobook ->
             // Handle audiobook click
+            (activity as MainActivity).playAudiobook(audiobook.uri)
         }
 
         popRecyclerView.adapter = popTrackAdapter
@@ -71,7 +72,7 @@ class HomeFragment : Fragment() {
         fetchRecommendations("pop", popTrackAdapter)
         fetchRecommendations("rock", rockTrackAdapter)
         fetchRecommendations("hip-hop", hipHopTrackAdapter)
-        fetchAudiobooks()
+        fetchAudiobooksByIds()
 
         return view
     }
@@ -98,29 +99,29 @@ class HomeFragment : Fragment() {
         })
     }
 
-    private fun fetchAudiobooks() {
+    private fun fetchAudiobooksByIds() {
         val accessToken = getAccessToken(requireContext())
-        SpotifyApi.service.getAudiobooks("Bearer $accessToken").enqueue(object : Callback<AudiobooksResponse> {
+        val audiobookIds = "18yVqkdbdRvS24c0Ilj2ci,1HGw3J3NxZO1TP1BTtVhpZ,7iHfbu1YPACw6oZPAFJtqe"
+        SpotifyApi.service.getAudiobooksByIds("Bearer $accessToken", audiobookIds).enqueue(object : Callback<AudiobooksResponse> {
             override fun onResponse(call: Call<AudiobooksResponse>, response: Response<AudiobooksResponse>) {
                 if (response.isSuccessful) {
                     val audiobooks = response.body()?.audiobooks ?: emptyList()
                     Log.d("HomeFragment", "Audiobooks retrieved: ${audiobooks.size}")
                     audiobookAdapter.updateAudiobooks(audiobooks)
                 } else {
-                    // Log the full response to help diagnose the issue
                     Log.e("HomeFragment", "Error fetching audiobooks: ${response.message()} - ${response.errorBody()?.string()}")
                     Toast.makeText(context, "Error fetching audiobooks", Toast.LENGTH_SHORT).show()
+                    audiobookAdapter.updateAudiobooks(emptyList())
                 }
             }
 
             override fun onFailure(call: Call<AudiobooksResponse>, t: Throwable) {
                 Log.e("HomeFragment", "API call failed: ${t.message}")
                 Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
+                audiobookAdapter.updateAudiobooks(emptyList())
             }
         })
     }
-
-
 
     private fun getAccessToken(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)

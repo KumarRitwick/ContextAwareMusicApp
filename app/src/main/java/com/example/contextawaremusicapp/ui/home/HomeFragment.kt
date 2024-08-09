@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.contextawaremusicapp.MainActivity
 import com.example.contextawaremusicapp.R
-import com.example.contextawaremusicapp.controller.TrackAdapter
-import com.example.contextawaremusicapp.model.RecommendationResponse
+import com.example.contextawaremusicapp.controller.PlaylistAdapter
+import RecommendedPlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
 import retrofit2.Call
 import retrofit2.Callback
@@ -22,14 +22,22 @@ import retrofit2.Response
 
 class HomeFragment : Fragment() {
 
-    private lateinit var popRecyclerView: RecyclerView
-    private lateinit var rockRecyclerView: RecyclerView
-    private lateinit var hipHopRecyclerView: RecyclerView
+    private lateinit var topListsRecyclerView: RecyclerView
+    private lateinit var moodRecyclerView: RecyclerView
+    private lateinit var workoutRecyclerView: RecyclerView
+    private lateinit var chillRecyclerView: RecyclerView
+    private lateinit var focusRecyclerView: RecyclerView
+    private lateinit var partyRecyclerView: RecyclerView
+    private lateinit var jazzRecyclerView: RecyclerView
     private lateinit var audiobooksRecyclerView: RecyclerView
 
-    private lateinit var popTrackAdapter: TrackAdapter
-    private lateinit var rockTrackAdapter: TrackAdapter
-    private lateinit var hipHopTrackAdapter: TrackAdapter
+    private lateinit var topListsAdapter: PlaylistAdapter
+    private lateinit var moodAdapter: PlaylistAdapter
+    private lateinit var workoutAdapter: PlaylistAdapter
+    private lateinit var chillAdapter: PlaylistAdapter
+    private lateinit var focusAdapter: PlaylistAdapter
+    private lateinit var partyAdapter: PlaylistAdapter
+    private lateinit var jazzAdapter: PlaylistAdapter
     private lateinit var audiobookAdapter: AudiobookAdapter
 
     override fun onCreateView(
@@ -39,60 +47,89 @@ class HomeFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
         // Initialize RecyclerViews and their adapters
-        popRecyclerView = view.findViewById(R.id.pop_recycler_view)
-        rockRecyclerView = view.findViewById(R.id.rock_recycler_view)
-        hipHopRecyclerView = view.findViewById(R.id.hiphop_recycler_view)
+        topListsRecyclerView = view.findViewById(R.id.toplists_recycler_view)
+        moodRecyclerView = view.findViewById(R.id.mood_recycler_view)
+        workoutRecyclerView = view.findViewById(R.id.workout_recycler_view)
+        chillRecyclerView = view.findViewById(R.id.chill_recycler_view)
+        focusRecyclerView = view.findViewById(R.id.focus_recycler_view)
+        partyRecyclerView = view.findViewById(R.id.party_recycler_view)
+        jazzRecyclerView = view.findViewById(R.id.jazz_recycler_view)
         audiobooksRecyclerView = view.findViewById(R.id.audiobooks_recycler_view)
 
-        popRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        rockRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        hipHopRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        // Set layout managers for each RecyclerView
+        topListsRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        moodRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        workoutRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        chillRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        focusRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        partyRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+        jazzRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         audiobooksRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
-        popTrackAdapter = TrackAdapter(emptyList()) { track ->
-            (activity as MainActivity).playPlaylist(track.uri)
+        // Initialize Adapters
+        topListsAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            (activity as MainActivity).playPlaylist(playlist.uri)
         }
-        rockTrackAdapter = TrackAdapter(emptyList()) { track ->
-            (activity as MainActivity).playPlaylist(track.uri)
+        moodAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            (activity as MainActivity).playPlaylist(playlist.uri)
         }
-        hipHopTrackAdapter = TrackAdapter(emptyList()) { track ->
-            (activity as MainActivity).playPlaylist(track.uri)
+        workoutAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            (activity as MainActivity).playPlaylist(playlist.uri)
+        }
+        chillAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            (activity as MainActivity).playPlaylist(playlist.uri)
+        }
+        focusAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            (activity as MainActivity).playPlaylist(playlist.uri)
+        }
+        partyAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            (activity as MainActivity).playPlaylist(playlist.uri)
+        }
+        jazzAdapter = PlaylistAdapter(emptyList()) { playlist ->
+            (activity as MainActivity).playPlaylist(playlist.uri)
         }
         audiobookAdapter = AudiobookAdapter(emptyList()) { audiobook ->
-            // Handle audiobook click
             (activity as MainActivity).playAudiobook(audiobook.uri)
         }
 
-        popRecyclerView.adapter = popTrackAdapter
-        rockRecyclerView.adapter = rockTrackAdapter
-        hipHopRecyclerView.adapter = hipHopTrackAdapter
+        // Set Adapters to RecyclerViews
+        topListsRecyclerView.adapter = topListsAdapter
+        moodRecyclerView.adapter = moodAdapter
+        workoutRecyclerView.adapter = workoutAdapter
+        chillRecyclerView.adapter = chillAdapter
+        focusRecyclerView.adapter = focusAdapter
+        partyRecyclerView.adapter = partyAdapter
+        jazzRecyclerView.adapter = jazzAdapter
         audiobooksRecyclerView.adapter = audiobookAdapter
 
-        // Fetch data for genres and audiobooks
-        fetchRecommendations("pop", popTrackAdapter)
-        fetchRecommendations("rock", rockTrackAdapter)
-        fetchRecommendations("hip-hop", hipHopTrackAdapter)
+        // Fetch data for categories and audiobooks
+        fetchCategoryPlaylists("toplists", topListsAdapter)
+        fetchCategoryPlaylists("mood", moodAdapter)
+        fetchCategoryPlaylists("workout", workoutAdapter)
+        fetchCategoryPlaylists("chill", chillAdapter)
+        fetchCategoryPlaylists("focus", focusAdapter)
+        fetchCategoryPlaylists("party", partyAdapter)
+        fetchCategoryPlaylists("jazz", jazzAdapter)
         fetchAudiobooksByIds()
 
         return view
     }
 
-    private fun fetchRecommendations(genre: String, adapter: TrackAdapter) {
+    private fun fetchCategoryPlaylists(category: String, adapter: PlaylistAdapter) {
         val accessToken = getAccessToken(requireContext())
-        val limit = 10
 
-        SpotifyApi.service.getRecommendations("Bearer $accessToken", limit, genre).enqueue(object : Callback<RecommendationResponse> {
-            override fun onResponse(call: Call<RecommendationResponse>, response: Response<RecommendationResponse>) {
+        SpotifyApi.service.getCategoryPlaylists("Bearer $accessToken", category).enqueue(object : Callback<RecommendedPlaylistsResponse> {
+            override fun onResponse(call: Call<RecommendedPlaylistsResponse>, response: Response<RecommendedPlaylistsResponse>) {
                 if (response.isSuccessful) {
-                    val tracks = response.body()?.tracks ?: emptyList()
-                    adapter.updateTracks(tracks)
+                    val playlists = response.body()?.playlists?.items ?: emptyList()
+                    adapter.updatePlaylists(playlists)
                 } else {
-                    Log.e("HomeFragment", "Error fetching recommendations for $genre: ${response.message()}")
-                    Toast.makeText(context, "Error fetching recommendations for $genre", Toast.LENGTH_SHORT).show()
+                    Log.e("HomeFragment", "Error fetching playlists for $category: ${response.message()}")
+                    Toast.makeText(context, "Error fetching playlists for $category", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<RecommendationResponse>, t: Throwable) {
+            override fun onFailure(call: Call<RecommendedPlaylistsResponse>, t: Throwable) {
                 Log.e("HomeFragment", "API call failed: ${t.message}")
                 Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
             }
@@ -131,7 +168,6 @@ class HomeFragment : Fragment() {
             }
         })
     }
-
 
     private fun getAccessToken(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)

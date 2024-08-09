@@ -19,8 +19,8 @@ class PlaylistAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class PlaylistViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val playlistName: TextView = view.findViewById(R.id.playlistName)
-        val playlistImage: ImageView = view.findViewById(R.id.playlistImage)
+        val playlistName: TextView = view.findViewById(R.id.playlist_name)
+        val playlistImage: ImageView = view.findViewById(R.id.playlist_cover)
     }
 
     class HeaderViewHolder(view: View) : RecyclerView.ViewHolder(view) {

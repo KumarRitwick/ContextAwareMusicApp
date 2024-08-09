@@ -1,75 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     tools:context=".ui.home.HomeFragment">
 
-    <!-- RecyclerView for Pop genre -->
-    <TextView
-        android:id="@+id/pop_genre_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Pop"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="8dp" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/pop_recycler_view"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+        android:orientation="vertical">
 
-    <!-- RecyclerView for Rock genre -->
-    <TextView
-        android:id="@+id/rock_genre_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Rock"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="8dp" />
+        <!-- Main Recommendation Section -->
+        <ImageView
+            android:id="@+id/recommended_playlist_cover"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_margin="16dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/placeholder_image" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rock_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+        <TextView
+            android:id="@+id/recommended_playlist_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="Recommended Playlist"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
 
-    <!-- RecyclerView for Hip-Hop genre -->
-    <TextView
-        android:id="@+id/hiphop_genre_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Hip-Hop"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="8dp" />
+        <!-- RecyclerView for Top Lists Playlists -->
+        <TextView
+            android:id="@+id/toplists_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Top Lists"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/hiphop_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/toplists_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
 
-    <!-- Title for Audiobooks section -->
-    <TextView
-        android:id="@+id/audiobooks_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Audiobooks"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="8dp" />
+        <!-- RecyclerView for Mood Playlists -->
+        <TextView
+            android:id="@+id/mood_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mood"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
 
-    <!-- RecyclerView for Audiobooks -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/audiobooks_recycler_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mood_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
 
-</LinearLayout>
+        <!-- RecyclerView for Workout Playlists -->
+        <TextView
+            android:id="@+id/workout_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Workout"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/workout_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+        <!-- RecyclerView for Chill Playlists -->
+        <TextView
+            android:id="@+id/chill_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chill"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/chill_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+        <!-- RecyclerView for Focus Playlists -->
+        <TextView
+            android:id="@+id/focus_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Focus"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/focus_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+        <!-- RecyclerView for Party Playlists -->
+        <TextView
+            android:id="@+id/party_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Party"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/party_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+        <!-- RecyclerView for Jazz Playlists -->
+        <TextView
+            android:id="@+id/jazz_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Jazz"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/jazz_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+
+        <!-- Title for Audiobooks section -->
+        <TextView
+            android:id="@+id/audiobooks_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Audiobooks"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:padding="8dp" />
+
+        <!-- RecyclerView for Audiobooks -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/audiobooks_recycler_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

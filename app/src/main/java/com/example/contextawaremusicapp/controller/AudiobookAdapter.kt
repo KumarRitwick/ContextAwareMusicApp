@@ -1,6 +1,7 @@
 package com.example.contextawaremusicapp.ui.home
 
 import Audiobook
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,12 +25,14 @@ class AudiobookAdapter(
         val audiobook = audiobooks[position]
         if (audiobook != null) {
             holder.bind(audiobook)
+        } else {
+            Log.e("AudiobookAdapter", "Audiobook at position $position is null.")
         }
     }
 
     override fun getItemCount(): Int = audiobooks.size
 
-    fun updateAudiobooks(newAudiobooks: List<Audiobook>) {
+    fun updateAudiobooks(newAudiobooks: List<Audiobook?>) {
         audiobooks = newAudiobooks.filterNotNull()
         notifyDataSetChanged()
     }

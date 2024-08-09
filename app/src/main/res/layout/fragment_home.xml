@@ -30,22 +30,6 @@
             android:textStyle="bold"
             android:padding="8dp" />
 
-        <!-- RecyclerView for Top Lists Playlists -->
-        <TextView
-            android:id="@+id/toplists_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Top Lists"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:padding="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/toplists_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" />
-
         <!-- RecyclerView for Mood Playlists -->
         <TextView
             android:id="@+id/mood_title"
@@ -74,54 +58,6 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/workout_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" />
-
-        <!-- RecyclerView for Chill Playlists -->
-        <TextView
-            android:id="@+id/chill_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Chill"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:padding="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/chill_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" />
-
-        <!-- RecyclerView for Focus Playlists -->
-        <TextView
-            android:id="@+id/focus_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Focus"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:padding="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/focus_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal" />
-
-        <!-- RecyclerView for Party Playlists -->
-        <TextView
-            android:id="@+id/party_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Party"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:padding="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/party_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal" />

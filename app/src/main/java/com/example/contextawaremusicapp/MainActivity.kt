@@ -9,23 +9,15 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.example.contextawaremusicapp.controller.AuthActivity
-import com.example.contextawaremusicapp.model.Playlist
-import com.example.contextawaremusicapp.model.PlaylistsResponse
-import com.example.contextawaremusicapp.model.SpotifyApi
-import com.example.contextawaremusicapp.model.UserResponse
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
 
 class MainActivity : AppCompatActivity() {
 

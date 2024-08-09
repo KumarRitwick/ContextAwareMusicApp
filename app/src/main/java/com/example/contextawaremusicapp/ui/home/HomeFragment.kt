@@ -7,39 +7,38 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.navigation.fragment.findNavController
-import com.example.contextawaremusicapp.MainActivity
+import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.PlaylistAdapter
 import RecommendedPlaylistsResponse
+import androidx.navigation.fragment.findNavController
+import com.example.contextawaremusicapp.MainActivity
 import com.example.contextawaremusicapp.model.SpotifyApi
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.Calendar
 
 class HomeFragment : Fragment() {
 
-    private lateinit var topListsRecyclerView: RecyclerView
     private lateinit var moodRecyclerView: RecyclerView
     private lateinit var workoutRecyclerView: RecyclerView
-    private lateinit var chillRecyclerView: RecyclerView
-    private lateinit var focusRecyclerView: RecyclerView
-    private lateinit var partyRecyclerView: RecyclerView
     private lateinit var jazzRecyclerView: RecyclerView
     private lateinit var audiobooksRecyclerView: RecyclerView
 
-    private lateinit var topListsAdapter: PlaylistAdapter
     private lateinit var moodAdapter: PlaylistAdapter
     private lateinit var workoutAdapter: PlaylistAdapter
-    private lateinit var chillAdapter: PlaylistAdapter
-    private lateinit var focusAdapter: PlaylistAdapter
-    private lateinit var partyAdapter: PlaylistAdapter
     private lateinit var jazzAdapter: PlaylistAdapter
     private lateinit var audiobookAdapter: AudiobookAdapter
+
+    private lateinit var recommendedPlaylistTitle: TextView
+    private lateinit var recommendedPlaylistCover: ImageView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,43 +46,25 @@ class HomeFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
+        // Initialize recommended playlist views
+        recommendedPlaylistTitle = view.findViewById(R.id.recommended_playlist_title)
+        recommendedPlaylistCover = view.findViewById(R.id.recommended_playlist_cover)
+
         // Initialize RecyclerViews and their adapters
-        topListsRecyclerView = view.findViewById(R.id.toplists_recycler_view)
         moodRecyclerView = view.findViewById(R.id.mood_recycler_view)
         workoutRecyclerView = view.findViewById(R.id.workout_recycler_view)
-        chillRecyclerView = view.findViewById(R.id.chill_recycler_view)
-        focusRecyclerView = view.findViewById(R.id.focus_recycler_view)
-        partyRecyclerView = view.findViewById(R.id.party_recycler_view)
         jazzRecyclerView = view.findViewById(R.id.jazz_recycler_view)
         audiobooksRecyclerView = view.findViewById(R.id.audiobooks_recycler_view)
 
-        // Set layout managers for each RecyclerView
-        topListsRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         moodRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         workoutRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        chillRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        focusRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        partyRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         jazzRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         audiobooksRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
-        // Initialize Adapters with click listeners for navigation
-        topListsAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            navigateToPlaylist(playlist.id)
-        }
         moodAdapter = PlaylistAdapter(emptyList()) { playlist ->
             navigateToPlaylist(playlist.id)
         }
         workoutAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            navigateToPlaylist(playlist.id)
-        }
-        chillAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            navigateToPlaylist(playlist.id)
-        }
-        focusAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            navigateToPlaylist(playlist.id)
-        }
-        partyAdapter = PlaylistAdapter(emptyList()) { playlist ->
             navigateToPlaylist(playlist.id)
         }
         jazzAdapter = PlaylistAdapter(emptyList()) { playlist ->
@@ -93,37 +74,41 @@ class HomeFragment : Fragment() {
             (activity as MainActivity).playAudiobook(audiobook.uri)
         }
 
-        // Set Adapters to RecyclerViews
-        topListsRecyclerView.adapter = topListsAdapter
         moodRecyclerView.adapter = moodAdapter
         workoutRecyclerView.adapter = workoutAdapter
-        chillRecyclerView.adapter = chillAdapter
-        focusRecyclerView.adapter = focusAdapter
-        partyRecyclerView.adapter = partyAdapter
         jazzRecyclerView.adapter = jazzAdapter
         audiobooksRecyclerView.adapter = audiobookAdapter
 
         // Fetch data for categories and audiobooks
-        fetchCategoryPlaylists("toplists", topListsAdapter)
         fetchCategoryPlaylists("mood", moodAdapter)
         fetchCategoryPlaylists("workout", workoutAdapter)
-        fetchCategoryPlaylists("chill", chillAdapter)
-        fetchCategoryPlaylists("focus", focusAdapter)
-        fetchCategoryPlaylists("party", partyAdapter)
         fetchCategoryPlaylists("jazz", jazzAdapter)
         fetchAudiobooksByIds()
+
+        // Fetch recommended playlist based on time
+        updateRecommendedPlaylist()
 
         return view
     }
 
-    private fun fetchCategoryPlaylists(category: String, adapter: PlaylistAdapter) {
+    private fun fetchCategoryPlaylists(category: String, adapter: PlaylistAdapter?) {
         val accessToken = getAccessToken(requireContext())
+        val limit = 10
 
-        SpotifyApi.service.getCategoryPlaylists("Bearer $accessToken", category).enqueue(object : Callback<RecommendedPlaylistsResponse> {
+        SpotifyApi.service.getCategoryPlaylists("Bearer $accessToken", category, limit, 0).enqueue(object : Callback<RecommendedPlaylistsResponse> {
             override fun onResponse(call: Call<RecommendedPlaylistsResponse>, response: Response<RecommendedPlaylistsResponse>) {
                 if (response.isSuccessful) {
                     val playlists = response.body()?.playlists?.items ?: emptyList()
-                    adapter.updatePlaylists(playlists)
+                    adapter?.updatePlaylists(playlists)
+
+                    // If it's the recommended category, display it on top
+                    if (adapter == null && playlists.isNotEmpty()) {
+                        val recommendedPlaylist = playlists[0]
+                        recommendedPlaylistTitle.text = recommendedPlaylist.name
+                        Glide.with(this@HomeFragment)
+                            .load(recommendedPlaylist.images.firstOrNull()?.url)
+                            .into(recommendedPlaylistCover)
+                    }
                 } else {
                     Log.e("HomeFragment", "Error fetching playlists for $category: ${response.message()}")
                     Toast.makeText(context, "Error fetching playlists for $category", Toast.LENGTH_SHORT).show()
@@ -135,6 +120,31 @@ class HomeFragment : Fragment() {
                 Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun updateRecommendedPlaylist() {
+        val currentTimeCategory = getCurrentTimeCategory()
+
+        val category = when (currentTimeCategory) {
+            TimeCategory.MORNING -> "toplists"
+            TimeCategory.AFTERNOON -> "focus"
+            TimeCategory.EVENING -> "chill"
+            TimeCategory.NIGHT -> "party"
+            else -> "chill"
+        }
+
+        fetchCategoryPlaylists(category, null)
+    }
+
+    private fun getCurrentTimeCategory(): TimeCategory {
+        val hourOfDay = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        return when (hourOfDay) {
+            in 6..10 -> TimeCategory.MORNING
+            in 11..15 -> TimeCategory.AFTERNOON
+            in 16..19 -> TimeCategory.EVENING
+            in 20..23 -> TimeCategory.NIGHT
+            else -> TimeCategory.DEFAULT
+        }
     }
 
     private fun fetchAudiobooksByIds() {
@@ -173,6 +183,10 @@ class HomeFragment : Fragment() {
     private fun getAccessToken(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)
         return sharedPreferences.getString("ACCESS_TOKEN", "") ?: ""
+    }
+
+    enum class TimeCategory {
+        MORNING, AFTERNOON, EVENING, NIGHT, DEFAULT
     }
 
     private fun navigateToPlaylist(playlistId: String) {

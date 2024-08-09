@@ -148,7 +148,7 @@ class SongDetailFragment : Fragment() {
 
         val sharedPreferences = EncryptedSharedPreferences.create(
             context,
-            "SpotifyCredential",
+            "SpotifyCredentials",
             masterKeyAlias,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM

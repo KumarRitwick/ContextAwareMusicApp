@@ -1,5 +1,6 @@
 package com.example.contextawaremusicapp.ui.playlists
 
+import RecommendedPlaylistsResponse
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
@@ -8,7 +9,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,7 +18,6 @@ import com.example.contextawaremusicapp.model.Playlist
 import com.example.contextawaremusicapp.model.PlaylistsResponse
 import com.example.contextawaremusicapp.model.SpotifyApi
 import com.example.contextawaremusicapp.model.UserResponse
-import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -47,8 +46,10 @@ class PlaylistFragment : Fragment() {
             val action = PlaylistFragmentDirections.actionPlaylistFragmentToPlaylistDetailFragment(playlist.uri)
             findNavController().navigate(action)
         }
+
+        // Initializing the adapter with empty list
         recommendationsAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            // Navigate to PlaylistDetailFragment or play directly
+            // Navigate to PlaylistDetailFragment
             val action = PlaylistFragmentDirections.actionPlaylistFragmentToPlaylistDetailFragment(playlist.uri)
             findNavController().navigate(action)
         }
@@ -57,7 +58,15 @@ class PlaylistFragment : Fragment() {
         recommendationsRecyclerView.adapter = recommendationsAdapter
 
         fetchUserPlaylists()
-        fetchFeaturedPlaylists()
+
+        // Fetch different categories of playlists and add headers
+        fetchCategoryPlaylists("toplists", "Top Lists")
+        fetchCategoryPlaylists("mood", "Mood")
+        fetchCategoryPlaylists("workout", "Workout")
+        fetchCategoryPlaylists("chill", "Chill")
+        fetchCategoryPlaylists("focus", "Focus")
+        fetchCategoryPlaylists("party", "Party")
+        fetchCategoryPlaylists("jazz", "Jazz")
 
         return view
     }
@@ -105,25 +114,34 @@ class PlaylistFragment : Fragment() {
         })
     }
 
-    private fun fetchFeaturedPlaylists() {
+    private fun fetchCategoryPlaylists(categoryId: String, headerTitle: String) {
         val accessToken = getAccessToken(requireContext())
-        SpotifyApi.service.getFeaturedPlaylists("Bearer $accessToken").enqueue(object : Callback<PlaylistsResponse> {
-            override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
+        val limit = 2
+        val offset = 0
+
+        SpotifyApi.service.getCategoryPlaylists("Bearer $accessToken", categoryId, limit, offset).enqueue(object : Callback<RecommendedPlaylistsResponse> {
+            override fun onResponse(call: Call<RecommendedPlaylistsResponse>, response: Response<RecommendedPlaylistsResponse>) {
                 if (response.isSuccessful) {
-                    val playlists = response.body()?.playlists ?: emptyList()
-                    Log.d("PlaylistFragment", "Featured Playlists: ${playlists.size}")
-                    recommendationsAdapter.updatePlaylists(playlists)
+                    val playlists = response.body()?.playlists?.items?.map { playlist ->
+                        playlist.copy(category = categoryId)
+                    } ?: emptyList()
+
+                    if (playlists.isNotEmpty()) {
+                        recommendationsAdapter.addHeaderAndPlaylists(headerTitle, playlists)
+                    } else {
+                        Log.e("PlaylistFragment", "No playlists found for category: $categoryId")
+                        Toast.makeText(context, "No playlists found for category: $categoryId", Toast.LENGTH_SHORT).show()
+                    }
                 } else {
-                    Log.e("PlaylistFragment", "Error fetching featured playlists: ${response.message()}")
-                    Toast.makeText(context, "Error fetching featured playlists", Toast.LENGTH_SHORT).show()
+                    Log.e("PlaylistFragment", "Error fetching playlists for $categoryId: ${response.message()}")
+                    Toast.makeText(context, "Error fetching playlists for $categoryId", Toast.LENGTH_SHORT).show()
                 }
             }
 
-            override fun onFailure(call: Call<PlaylistsResponse>, t: Throwable) {
+            override fun onFailure(call: Call<RecommendedPlaylistsResponse>, t: Throwable) {
                 Log.e("PlaylistFragment", "API call failed: ${t.message}")
                 Toast.makeText(context, "API call failed: ${t.message}", Toast.LENGTH_SHORT).show()
             }
         })
     }
-
 }

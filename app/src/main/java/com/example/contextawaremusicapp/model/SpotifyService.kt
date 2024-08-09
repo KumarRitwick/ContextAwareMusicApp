@@ -1,6 +1,7 @@
 package com.example.contextawaremusicapp.model
 
 import AudiobooksResponse
+import RecommendedPlaylistsResponse
 import retrofit2.Call
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
@@ -63,4 +64,12 @@ interface SpotifyService {
         @Header("Authorization") authHeader: String,
         @Query("ids") ids: String
     ): Call<AudiobooksResponse>
+
+    @GET("v1/browse/categories/{category_id}/playlists")
+    fun getCategoryPlaylists(
+        @Header("Authorization") authHeader: String,
+        @Path("category_id") categoryId: String,
+        @Query("limit") limit: Int = 20,
+        @Query("offset") offset: Int = 0
+    ): Call<RecommendedPlaylistsResponse>
 }

@@ -11,7 +11,8 @@ data class Playlist(
     @SerializedName("name") val name: String,
     @SerializedName("description") val description: String,
     @SerializedName("uri") val uri: String,
-    @SerializedName("images") val images: List<Image>
+    @SerializedName("images") val images: List<Image>,
+    val category: String? = null
 )
 
 data class PlaylistsResponse(

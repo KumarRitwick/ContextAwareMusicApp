@@ -18,7 +18,6 @@ import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.PlaylistAdapter
 import RecommendedPlaylistsResponse
 import androidx.navigation.fragment.findNavController
-import com.example.contextawaremusicapp.MainActivity
 import com.example.contextawaremusicapp.model.SpotifyApi
 import retrofit2.Call
 import retrofit2.Callback
@@ -39,6 +38,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var recommendedPlaylistTitle: TextView
     private lateinit var recommendedPlaylistCover: ImageView
+    private var recommendedPlaylistUri: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,6 +49,13 @@ class HomeFragment : Fragment() {
         // Initialize recommended playlist views
         recommendedPlaylistTitle = view.findViewById(R.id.recommended_playlist_title)
         recommendedPlaylistCover = view.findViewById(R.id.recommended_playlist_cover)
+
+        // Set up click listener for recommended playlist
+        view.findViewById<View>(R.id.recommended_playlist_container).setOnClickListener {
+            recommendedPlaylistUri?.let { uri ->
+                navigateToPlaylist(uri)
+            }
+        }
 
         // Initialize RecyclerViews and their adapters
         moodRecyclerView = view.findViewById(R.id.mood_recycler_view)
@@ -71,7 +78,7 @@ class HomeFragment : Fragment() {
             navigateToPlaylist(playlist.id)
         }
         audiobookAdapter = AudiobookAdapter(emptyList()) { audiobook ->
-            (activity as MainActivity).playAudiobook(audiobook.uri)
+            navigateToPlaylist(audiobook.uri)
         }
 
         moodRecyclerView.adapter = moodAdapter
@@ -105,6 +112,7 @@ class HomeFragment : Fragment() {
                     if (adapter == null && playlists.isNotEmpty()) {
                         val recommendedPlaylist = playlists[0]
                         recommendedPlaylistTitle.text = recommendedPlaylist.name
+                        recommendedPlaylistUri = recommendedPlaylist.uri
                         Glide.with(this@HomeFragment)
                             .load(recommendedPlaylist.images.firstOrNull()?.url)
                             .into(recommendedPlaylistCover)

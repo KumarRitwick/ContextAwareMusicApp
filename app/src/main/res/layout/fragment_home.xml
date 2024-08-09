@@ -12,23 +12,32 @@
         android:orientation="vertical">
 
         <!-- Main Recommendation Section -->
-        <ImageView
-            android:id="@+id/recommended_playlist_cover"
+        <LinearLayout
+            android:id="@+id/recommended_playlist_container"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_margin="16dp"
-            android:scaleType="centerCrop"
-            android:background="@drawable/placeholder_image" />
-
-        <TextView
-            android:id="@+id/recommended_playlist_title"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:text="Recommended Playlist"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:padding="8dp" />
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="true">
+
+            <ImageView
+                android:id="@+id/recommended_playlist_cover"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_margin="16dp"
+                android:scaleType="centerCrop"
+                android:background="@drawable/placeholder_image" />
+
+            <TextView
+                android:id="@+id/recommended_playlist_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="Recommended Playlist"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:padding="8dp" />
+        </LinearLayout>
 
         <!-- RecyclerView for Mood Playlists -->
         <TextView

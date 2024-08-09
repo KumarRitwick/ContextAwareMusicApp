@@ -5,6 +5,7 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/navigation_home">
 
+    <!-- Home Fragment -->
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.example.contextawaremusicapp.ui.home.HomeFragment"
@@ -19,6 +20,7 @@
         </action>
     </fragment>
 
+    <!-- Playlists Fragment -->
     <fragment
         android:id="@+id/navigation_playlists"
         android:name="com.example.contextawaremusicapp.ui.playlists.PlaylistFragment"
@@ -33,6 +35,7 @@
         </action>
     </fragment>
 
+    <!-- Playlist Detail Fragment -->
     <fragment
         android:id="@+id/navigation_playlist_detail"
         android:name="com.example.contextawaremusicapp.ui.playlistdetail.PlaylistDetailFragment"
@@ -43,6 +46,7 @@
             app:argType="string" />
     </fragment>
 
+    <!-- Song Detail Fragment -->
     <fragment
         android:id="@+id/navigation_song_detail"
         android:name="com.example.contextawaremusicapp.ui.songdetail.SongDetailFragment"

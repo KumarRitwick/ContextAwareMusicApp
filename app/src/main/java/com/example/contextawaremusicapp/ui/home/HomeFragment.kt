@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.navigation.fragment.findNavController
 import com.example.contextawaremusicapp.MainActivity
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.PlaylistAdapter
@@ -66,27 +67,27 @@ class HomeFragment : Fragment() {
         jazzRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         audiobooksRecyclerView.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
 
-        // Initialize Adapters
+        // Initialize Adapters with click listeners for navigation
         topListsAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            (activity as MainActivity).playPlaylist(playlist.uri)
+            navigateToPlaylist(playlist.id)
         }
         moodAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            (activity as MainActivity).playPlaylist(playlist.uri)
+            navigateToPlaylist(playlist.id)
         }
         workoutAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            (activity as MainActivity).playPlaylist(playlist.uri)
+            navigateToPlaylist(playlist.id)
         }
         chillAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            (activity as MainActivity).playPlaylist(playlist.uri)
+            navigateToPlaylist(playlist.id)
         }
         focusAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            (activity as MainActivity).playPlaylist(playlist.uri)
+            navigateToPlaylist(playlist.id)
         }
         partyAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            (activity as MainActivity).playPlaylist(playlist.uri)
+            navigateToPlaylist(playlist.id)
         }
         jazzAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            (activity as MainActivity).playPlaylist(playlist.uri)
+            navigateToPlaylist(playlist.id)
         }
         audiobookAdapter = AudiobookAdapter(emptyList()) { audiobook ->
             (activity as MainActivity).playAudiobook(audiobook.uri)
@@ -172,5 +173,10 @@ class HomeFragment : Fragment() {
     private fun getAccessToken(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)
         return sharedPreferences.getString("ACCESS_TOKEN", "") ?: ""
+    }
+
+    private fun navigateToPlaylist(playlistId: String) {
+        val action = HomeFragmentDirections.actionHomeFragmentToPlaylistDetailFragment(playlistId)
+        findNavController().navigate(action)
     }
 }

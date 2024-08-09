@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -14,6 +15,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.NavigationUI
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
+import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.controller.AuthActivity
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -24,6 +26,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var playbackBar: View
     private lateinit var currentTrackName: TextView
     private lateinit var playPauseButton: ImageButton
+    private lateinit var trackArt: ImageView
     private var isPlaying: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,8 +46,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupUI() {
         playbackBar = findViewById(R.id.playback_bar)
-        currentTrackName = findViewById(R.id.current_track_name)
+        currentTrackName = findViewById(R.id.track_name)
         playPauseButton = findViewById(R.id.play_pause_button)
+        trackArt = findViewById(R.id.track_art)
 
         playPauseButton.setOnClickListener {
             if (isPlaying) {
@@ -71,13 +75,13 @@ class MainActivity : AppCompatActivity() {
         NavigationUI.setupWithNavController(bottomNavigationView, navController)
     }
 
-    fun playPlaylist(playlistUri: String) {
+    fun playPlaylist(playlistUri: String, trackArtUrl: String) {
         Log.d("MainActivity", "Attempting to play playlist: $playlistUri")
         lifecycleScope.launch {
             try {
                 SpotifyRemoteManager.playTrack(playlistUri)
                 isPlaying = true
-                updatePlaybackBar("Playing playlist...", isPlaying)
+                updatePlaybackBar("Playing playlist...", isPlaying, trackArtUrl)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error playing playlist: $playlistUri", e)
             }
@@ -108,10 +112,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePlaybackBar(trackName: String, isPlaying: Boolean) {
+    private fun updatePlaybackBar(trackName: String, isPlaying: Boolean, trackArtUrl: String? = null) {
         currentTrackName.text = trackName
         playPauseButton.setImageResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
         playbackBar.visibility = View.VISIBLE
+
+        trackArtUrl?.let { url ->
+            Glide.with(this)
+                .load(url)
+                .into(trackArt)
+        }
     }
 
     fun getAccessToken(context: Context): String {
@@ -169,13 +179,13 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
-    fun playAudiobook(audiobookUri: String) {
+    fun playAudiobook(audiobookUri: String, audiobookArtUrl: String) {
         Log.d("MainActivity", "Attempting to play audiobook: $audiobookUri")
         lifecycleScope.launch {
             try {
                 SpotifyRemoteManager.playTrack(audiobookUri)
                 isPlaying = true
-                updatePlaybackBar("Playing audiobook...", isPlaying)
+                updatePlaybackBar("Playing audiobook...", isPlaying, audiobookArtUrl)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error playing audiobook: $audiobookUri", e)
             }

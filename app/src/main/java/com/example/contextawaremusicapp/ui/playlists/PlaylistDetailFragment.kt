@@ -27,6 +27,7 @@ class PlaylistDetailFragment : Fragment() {
 
     private lateinit var tracksRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
+    private var playlistImageUrl: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -38,7 +39,9 @@ class PlaylistDetailFragment : Fragment() {
         tracksRecyclerView.layoutManager = LinearLayoutManager(context)
 
         trackAdapter = TrackAdapter(listOf()) { track ->
-            (activity as? MainActivity)?.playPlaylist(track.uri)
+            playlistImageUrl?.let { trackArtUrl ->
+                (activity as? MainActivity)?.playPlaylist(track.uri, trackArtUrl)
+            }
         }
         tracksRecyclerView.adapter = trackAdapter
 
@@ -59,6 +62,7 @@ class PlaylistDetailFragment : Fragment() {
                 if (response.isSuccessful) {
                     val playlist = response.body()
                     playlist?.let {
+                        playlistImageUrl = it.images.firstOrNull()?.url
                         loadPlaylistDetails(it)
                     }
                 } else {
@@ -93,7 +97,6 @@ class PlaylistDetailFragment : Fragment() {
     }
 
     private fun loadPlaylistDetails(playlist: Playlist) {
-        // Update the UI with playlist details (name, image, etc.)
         val playlistImageView = view?.findViewById<ImageView>(R.id.playlist_image)
         val playlistNameTextView = view?.findViewById<TextView>(R.id.playlist_name)
 

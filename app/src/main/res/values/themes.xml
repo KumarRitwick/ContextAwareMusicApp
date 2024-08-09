@@ -14,6 +14,11 @@
         <item name="colorAccent">@color/teal_200</item>
     </style>
 
+    <style name="Theme.ContextAwareMusicApp.PlayerScreen" parent="Theme.ContextAwareMusicApp.NoActionBar">
+        <item name="android:background">@color/playerBackgroundColor</item>
+        <item name="android:textColor">@color/playerTextColor</item>
+    </style>
+
     <style name="SplashTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="android:windowBackground">@color/white</item>
         <item name="android:windowNoTitle">true</item>

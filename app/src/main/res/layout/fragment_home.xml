@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/playerBackgroundColor"
     tools:context=".ui.home.HomeFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <!-- Main Recommendation Section -->
         <LinearLayout
@@ -18,24 +20,24 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:clickable="true"
-            android:focusable="true">
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
 
             <ImageView
                 android:id="@+id/recommended_playlist_cover"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
-                android:layout_margin="16dp"
                 android:scaleType="centerCrop"
-                android:background="@drawable/placeholder_image" />
+                tools:srcCompat="@drawable/placeholder_image" />
 
             <TextView
                 android:id="@+id/recommended_playlist_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
                 android:text="Recommended Playlist"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                android:textColor="@color/playerTextColor"
                 android:padding="8dp" />
         </LinearLayout>
 
@@ -47,13 +49,15 @@
             android:text="Mood"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:textColor="@color/playerTextColor"
             android:padding="8dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/mood_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:background="@color/playerBackgroundColor" />
 
         <!-- RecyclerView for Workout Playlists -->
         <TextView
@@ -63,13 +67,15 @@
             android:text="Workout"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:textColor="@color/playerTextColor"
             android:padding="8dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/workout_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:background="@color/playerBackgroundColor" />
 
         <!-- RecyclerView for Jazz Playlists -->
         <TextView
@@ -79,13 +85,15 @@
             android:text="Jazz"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:textColor="@color/playerTextColor"
             android:padding="8dp" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/jazz_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:background="@color/playerBackgroundColor" />
 
         <!-- Title for Audiobooks section -->
         <TextView
@@ -95,6 +103,7 @@
             android:text="Audiobooks"
             android:textSize="20sp"
             android:textStyle="bold"
+            android:textColor="@color/playerTextColor"
             android:padding="8dp" />
 
         <!-- RecyclerView for Audiobooks -->
@@ -102,6 +111,7 @@
             android:id="@+id/audiobooks_recycler_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:background="@color/playerBackgroundColor" />
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

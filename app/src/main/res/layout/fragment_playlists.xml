@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/playerBackgroundColor"
     tools:context=".ui.playlists.PlaylistFragment">
 
     <TextView
@@ -15,6 +16,7 @@
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/playerTextColor"
         android:padding="16dp"/>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -35,6 +37,7 @@
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintTop_toBottomOf="@id/user_playlists_recycler_view"
+        android:textColor="@color/playerTextColor"
         app:layout_constraintStart_toStartOf="parent"
         android:padding="16dp"/>
 

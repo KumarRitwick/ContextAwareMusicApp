@@ -78,13 +78,13 @@ class PlaylistFragment : Fragment() {
 
     private fun fetchUserPlaylists() {
         val accessToken = getAccessToken(requireContext())
-        SpotifyApi.service.getCurrentUser("Bearer $accessToken").enqueue(object : Callback<UserResponse> {
+        SpotifyApi.spotifyService.getCurrentUser("Bearer $accessToken").enqueue(object : Callback<UserResponse> {
             override fun onResponse(call: Call<UserResponse>, response: Response<UserResponse>) {
                 if (response.isSuccessful) {
                     val userId = response.body()?.id
                     if (userId != null) {
                         // Fetch the user's playlists
-                        SpotifyApi.service.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
+                        SpotifyApi.spotifyService.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
                             override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
                                 if (response.isSuccessful) {
                                     val playlists = response.body()?.playlists ?: emptyList()
@@ -119,7 +119,7 @@ class PlaylistFragment : Fragment() {
         val limit = 2
         val offset = 0
 
-        SpotifyApi.service.getCategoryPlaylists("Bearer $accessToken", categoryId, limit, offset).enqueue(object : Callback<RecommendedPlaylistsResponse> {
+        SpotifyApi.spotifyService.getCategoryPlaylists("Bearer $accessToken", categoryId, limit, offset).enqueue(object : Callback<RecommendedPlaylistsResponse> {
             override fun onResponse(call: Call<RecommendedPlaylistsResponse>, response: Response<RecommendedPlaylistsResponse>) {
                 if (response.isSuccessful) {
                     val playlists = response.body()?.playlists?.items?.map { playlist ->

@@ -71,7 +71,7 @@ class SongDetailFragment : Fragment() {
 
     private fun fetchPlaylistDetails(playlistId: String) {
         val accessToken = getAccessToken(requireContext())
-        SpotifyApi.service.getPlaylistDetails("Bearer $accessToken", playlistId).enqueue(object : Callback<Playlist> {
+        SpotifyApi.spotifyService.getPlaylistDetails("Bearer $accessToken", playlistId).enqueue(object : Callback<Playlist> {
             override fun onResponse(call: Call<Playlist>, response: Response<Playlist>) {
                 if (response.isSuccessful) {
                     val playlist = response.body()
@@ -95,7 +95,7 @@ class SongDetailFragment : Fragment() {
 
     private fun fetchPlaylistTracks(playlistId: String) {
         val accessToken = getAccessToken(requireContext())
-        SpotifyApi.service.getPlaylistTracks("Bearer $accessToken", playlistId).enqueue(object : Callback<TracksResponse> {
+        SpotifyApi.spotifyService.getPlaylistTracks("Bearer $accessToken", playlistId).enqueue(object : Callback<TracksResponse> {
             override fun onResponse(call: Call<TracksResponse>, response: Response<TracksResponse>) {
                 if (response.isSuccessful) {
                     val trackItems = response.body()?.items

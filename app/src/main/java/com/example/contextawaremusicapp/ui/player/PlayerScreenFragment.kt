@@ -1,6 +1,9 @@
 package com.example.contextawaremusicapp.ui.player
 
 import SpotifyQueueResponse
+import android.Manifest
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -11,6 +14,7 @@ import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -21,7 +25,9 @@ import com.example.contextawaremusicapp.MainActivity
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.TrackAdapter
 import com.example.contextawaremusicapp.model.SpotifyApi
+import com.example.contextawaremusicapp.model.WeatherResponse
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
+import com.google.android.gms.location.LocationServices
 import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.ImageUri
 import com.spotify.protocol.types.PlayerState
@@ -30,6 +36,7 @@ import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.Locale
 
 class PlayerScreenFragment : Fragment() {
 
@@ -46,6 +53,7 @@ class PlayerScreenFragment : Fragment() {
 
     private var playerStateSubscription: Subscription<PlayerState>? = null
     private var isShuffleEnabled = false
+    private val locationPermissionCode = 101
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -71,6 +79,7 @@ class PlayerScreenFragment : Fragment() {
 
         setupPlayerControls()
         fetchUserQueue()
+        checkLocationPermissionAndFetchWeather(view)
 
         return view
     }
@@ -119,13 +128,13 @@ class PlayerScreenFragment : Fragment() {
 
         isShuffleEnabled = !isShuffleEnabled
 
-        SpotifyApi.service.setShuffleState("Bearer $accessToken", isShuffleEnabled).enqueue(object : Callback<Void> {
+        SpotifyApi.spotifyService.setShuffleState("Bearer $accessToken", isShuffleEnabled).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 if (response.isSuccessful) {
                     val message = if (isShuffleEnabled) "Shuffle Enabled" else "Shuffle Disabled"
                     Log.d("SHUFFLE_STATUS", message)
                     updateShuffleButtonUI()
-                    fetchUserQueue() // Refresh the queue to reflect the shuffled state
+                    fetchUserQueue()
                 } else {
                     handleShuffleError(response)
                 }
@@ -141,9 +150,6 @@ class PlayerScreenFragment : Fragment() {
         if (response.code() == 403) {
             val errorBody = response.errorBody()?.string()
             Log.e("API_ERROR", "Error in shuffle response: $errorBody")
-            // You might want to parse the errorBody to check the specific reason
-
-            // Show an appropriate message to the user based on the restriction
             if (errorBody?.contains("Restriction violated") == true) {
                 showMessageToUser("Shuffle command not allowed. This could be due to your current Spotify plan or context.")
             } else {
@@ -157,7 +163,6 @@ class PlayerScreenFragment : Fragment() {
     private fun showMessageToUser(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
-
 
     private fun updateShuffleButtonUI() {
         if (isShuffleEnabled) {
@@ -213,7 +218,7 @@ class PlayerScreenFragment : Fragment() {
     private fun fetchUserQueue() {
         val accessToken = (activity as? MainActivity)?.getAccessToken(requireContext()) ?: return
 
-        SpotifyApi.service.getUserQueue("Bearer $accessToken").enqueue(object : Callback<SpotifyQueueResponse> {
+        SpotifyApi.spotifyService.getUserQueue("Bearer $accessToken").enqueue(object : Callback<SpotifyQueueResponse> {
             override fun onResponse(call: Call<SpotifyQueueResponse>, response: Response<SpotifyQueueResponse>) {
                 if (response.isSuccessful) {
                     val queueResponse = response.body()
@@ -251,6 +256,101 @@ class PlayerScreenFragment : Fragment() {
         lifecycleScope.launch {
             SpotifyRemoteManager.playTrack(trackUri)
             fetchUserQueue()
+        }
+    }
+
+    private fun checkLocationPermissionAndFetchWeather(view: View) {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                locationPermissionCode
+            )
+        } else {
+            fetchLastKnownLocation(view)
+        }
+    }
+
+    private fun fetchLastKnownLocation(view: View) {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                location?.let {
+                    fetchWeatherDataAndUpdateBackground(view, it.latitude, it.longitude)
+                } ?: Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun fetchWeatherDataAndUpdateBackground(view: View, latitude: Double, longitude: Double) {
+        SpotifyApi.openMeteoService.getWeather(latitude, longitude).enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
+                if (response.isSuccessful) {
+                    val weatherResponse = response.body()
+                    if (weatherResponse != null) {
+                        val weatherCode = weatherResponse.current?.weather_code
+                            ?: weatherResponse.hourly?.weather_code?.firstOrNull()
+
+                        if (weatherCode != null) {
+                            updateBackgroundColor(view, weatherCode)
+                        } else {
+                            Log.e("API_ERROR", "Weather data is null")
+                        }
+                    } else {
+                        Log.e("API_ERROR", "Error fetching weather data: ${response.errorBody()?.string()}")
+                    }
+                } else {
+                    Log.e("API_ERROR", "Error fetching weather data: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                Log.e("API_FAILURE", "Weather API call failed: ${t.message}")
+            }
+        })
+    }
+
+    private fun updateBackgroundColor(view: View, weatherCode: Int) {
+        val backgroundColorResId = when (weatherCode) {
+            1 -> R.color.clearWeather
+            2 -> R.color.cloudyWeather
+            3 -> R.color.rainyWeather
+            4 -> R.color.snowyWeather
+            5 -> R.color.stormyWeather
+            else -> R.color.defaultWeather
+        }
+
+        view.setBackgroundColor(ContextCompat.getColor(requireContext(), backgroundColorResId))
+    }
+
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == locationPermissionCode && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            fetchLastKnownLocation(requireView())
+        } else {
+            Toast.makeText(requireContext(), "Location permission denied", Toast.LENGTH_SHORT).show()
         }
     }
 }

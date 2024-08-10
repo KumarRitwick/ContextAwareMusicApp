@@ -102,7 +102,7 @@ class HomeFragment : Fragment() {
         val accessToken = getAccessToken(requireContext())
         val limit = 10
 
-        SpotifyApi.service.getCategoryPlaylists("Bearer $accessToken", category, limit, 0).enqueue(object : Callback<RecommendedPlaylistsResponse> {
+        SpotifyApi.spotifyService.getCategoryPlaylists("Bearer $accessToken", category, limit, 0).enqueue(object : Callback<RecommendedPlaylistsResponse> {
             override fun onResponse(call: Call<RecommendedPlaylistsResponse>, response: Response<RecommendedPlaylistsResponse>) {
                 if (response.isSuccessful) {
                     val playlists = response.body()?.playlists?.items ?: emptyList()
@@ -159,7 +159,7 @@ class HomeFragment : Fragment() {
         val accessToken = getAccessToken(requireContext())
         val audiobookIds = "1QE2T94jOEXHUzw9t1bcOi,6dQDjeIzHGxg1Fy2Esr1Hb,5pveT2lEIPURW8nIzJrHvz,2kjaFU9MKm5WSJzjp1zYq8,0XJcPs6GB3FhRRStoUbCuL"
 
-        SpotifyApi.service.getAudiobooksByIds("Bearer $accessToken", audiobookIds).enqueue(object : Callback<AudiobooksResponse> {
+        SpotifyApi.spotifyService.getAudiobooksByIds("Bearer $accessToken", audiobookIds).enqueue(object : Callback<AudiobooksResponse> {
             override fun onResponse(call: Call<AudiobooksResponse>, response: Response<AudiobooksResponse>) {
                 if (response.isSuccessful) {
                     val audiobooks = response.body()?.audiobooks

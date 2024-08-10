@@ -17,7 +17,8 @@ object SpotifyApi {
         appContext = context.applicationContext
     }
 
-    private const val BASE_URL = "https://api.spotify.com/"
+    private const val BASE_URL_SPOTIFY = "https://api.spotify.com/"
+    private const val BASE_URL_METEO = "https://api.open-meteo.com/"
 
     private val client by lazy {
         OkHttpClient.Builder()
@@ -52,16 +53,24 @@ object SpotifyApi {
             .build()
     }
 
-    val retrofit: Retrofit by lazy {
+    val spotifyRetrofit: Retrofit by lazy {
         Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(BASE_URL_SPOTIFY)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }
 
-    val service: SpotifyService by lazy {
-        retrofit.create(SpotifyService::class.java)
+    val openMeteoService: OpenMeteoService by lazy {
+        Retrofit.Builder()
+            .baseUrl(BASE_URL_METEO)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(OpenMeteoService::class.java)
+    }
+
+    val spotifyService: SpotifyService by lazy {
+        spotifyRetrofit.create(SpotifyService::class.java)
     }
 
     private fun refreshToken(context: Context): String {

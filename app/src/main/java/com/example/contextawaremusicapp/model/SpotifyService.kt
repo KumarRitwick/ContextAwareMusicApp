@@ -86,3 +86,15 @@ interface SpotifyService {
         @Query("state") state: Boolean
     ): Call<Void>
 }
+
+interface OpenMeteoService {
+    @GET("v1/forecast")
+    fun getWeather(
+        @Query("latitude") latitude: Double,
+        @Query("longitude") longitude: Double,
+        @Query("hourly") hourly: String = "weather_code",
+        @Query("timezone") timezone: String = "GMT"
+    ): Call<WeatherResponse>
+}
+
+

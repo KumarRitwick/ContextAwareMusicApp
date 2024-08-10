@@ -1,6 +1,10 @@
-package com.example.contextawaremusicapp.model
-
 import com.google.gson.annotations.SerializedName
+import com.example.contextawaremusicapp.model.Track
+
+data class SpotifyQueueResponse(
+    @SerializedName("currently_playing") val currentlyPlaying: Track,
+    @SerializedName("queue") val queue: List<Track>
+)
 
 data class Track(
     @SerializedName("id") val id: String,
@@ -14,12 +18,17 @@ data class Track(
 data class Artist(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String,
-    @SerializedName("uri") val uri: String? = null
+    @SerializedName("uri") val uri: String
 )
 
 data class Album(
     @SerializedName("id") val id: String,
     @SerializedName("name") val name: String,
-    @SerializedName("images") val images: List<Image>,
-    @SerializedName("uri") val uri: String? = null
+    @SerializedName("images") val images: List<QueueImage>,
+    @SerializedName("uri") val uri: String
 )
+
+data class QueueImage(
+    @SerializedName("url") val url: String
+)
+

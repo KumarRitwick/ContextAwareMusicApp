@@ -28,7 +28,15 @@ class AuthActivity : AppCompatActivity() {
 
     private fun startAuthorization() {
         val builder = AuthorizationRequest.Builder(CLIENT_ID, AuthorizationResponse.Type.TOKEN, REDIRECT_URI)
-        builder.setScopes(arrayOf("user-read-private", "playlist-read-private", "playlist-read-collaborative", "user-library-read", "streaming"))
+        builder.setScopes(arrayOf(
+            "user-read-private",
+            "playlist-read-private",
+            "playlist-read-collaborative",
+            "user-library-read",
+            "streaming",
+            "user-read-playback-state",
+            "user-read-currently-playing"
+        ))
         val request = builder.build()
 
         AuthorizationClient.openLoginActivity(this, AUTH_TOKEN_REQUEST_CODE, request)

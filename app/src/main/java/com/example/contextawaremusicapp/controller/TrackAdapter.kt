@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.model.Track
+import SpotifyQueueResponse
 
 class TrackAdapter(
     private var tracks: List<Track>,
@@ -28,6 +29,7 @@ class TrackAdapter(
 
     override fun onBindViewHolder(holder: TrackViewHolder, position: Int) {
         val track = tracks[position]
+
         holder.trackName.text = track.name
         holder.artistName.text = track.artists.joinToString(separator = ", ") { it.name }
         if (track.album.images.isNotEmpty()) {
@@ -46,7 +48,8 @@ class TrackAdapter(
     override fun getItemCount() = tracks.size
 
     fun updateTracks(newTracks: List<Track>) {
-        tracks = newTracks
+        val uniqueTracks = newTracks.distinctBy { it.id }
+        tracks = uniqueTracks
         notifyDataSetChanged()
     }
 }

@@ -337,6 +337,7 @@ class PlayerScreenFragment : Fragment() {
         }
 
         view.setBackgroundColor(ContextCompat.getColor(requireContext(), backgroundColorResId))
+        queueRecyclerView.setBackgroundColor(ContextCompat.getColor(requireContext(), backgroundColorResId))
     }
 
 

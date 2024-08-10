@@ -9,6 +9,7 @@ import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -78,4 +79,10 @@ interface SpotifyService {
     fun getUserQueue(
         @Header("Authorization") authHeader: String
     ): Call<SpotifyQueueResponse>
+
+    @PUT("v1/me/player/shuffle")
+    fun setShuffleState(
+        @Header("Authorization") authHeader: String,
+        @Query("state") state: Boolean
+    ): Call<Void>
 }

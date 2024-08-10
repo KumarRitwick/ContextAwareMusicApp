@@ -10,6 +10,8 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -19,7 +21,6 @@ import com.example.contextawaremusicapp.MainActivity
 import com.example.contextawaremusicapp.R
 import com.example.contextawaremusicapp.controller.TrackAdapter
 import com.example.contextawaremusicapp.model.SpotifyApi
-import com.example.contextawaremusicapp.model.Track
 import com.example.contextawaremusicapp.utils.SpotifyRemoteManager
 import com.spotify.protocol.client.Subscription
 import com.spotify.protocol.types.ImageUri
@@ -39,10 +40,12 @@ class PlayerScreenFragment : Fragment() {
     private lateinit var previousButton: ImageButton
     private lateinit var playPauseButton: ImageButton
     private lateinit var nextButton: ImageButton
+    private lateinit var shuffleButton: ImageButton
     private lateinit var queueRecyclerView: RecyclerView
     private lateinit var trackAdapter: TrackAdapter
 
     private var playerStateSubscription: Subscription<PlayerState>? = null
+    private var isShuffleEnabled = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,6 +60,7 @@ class PlayerScreenFragment : Fragment() {
         previousButton = view.findViewById(R.id.previous_button)
         playPauseButton = view.findViewById(R.id.play_pause_button)
         nextButton = view.findViewById(R.id.next_button)
+        shuffleButton = view.findViewById(R.id.shuffle_button)
         queueRecyclerView = view.findViewById(R.id.queue_recycler_view)
 
         queueRecyclerView.layoutManager = LinearLayoutManager(context)
@@ -94,6 +98,10 @@ class PlayerScreenFragment : Fragment() {
             SpotifyRemoteManager.skipToNext()
         }
 
+        shuffleButton.setOnClickListener {
+            toggleShuffle()
+        }
+
         trackProgress.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
@@ -104,6 +112,60 @@ class PlayerScreenFragment : Fragment() {
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
+    }
+
+    private fun toggleShuffle() {
+        val accessToken = (activity as? MainActivity)?.getAccessToken(requireContext()) ?: return
+
+        isShuffleEnabled = !isShuffleEnabled
+
+        SpotifyApi.service.setShuffleState("Bearer $accessToken", isShuffleEnabled).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    val message = if (isShuffleEnabled) "Shuffle Enabled" else "Shuffle Disabled"
+                    Log.d("SHUFFLE_STATUS", message)
+                    updateShuffleButtonUI()
+                    fetchUserQueue() // Refresh the queue to reflect the shuffled state
+                } else {
+                    handleShuffleError(response)
+                }
+            }
+
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("API_FAILURE", "Shuffle API call failed: ${t.message}")
+            }
+        })
+    }
+
+    private fun handleShuffleError(response: Response<Void>) {
+        if (response.code() == 403) {
+            val errorBody = response.errorBody()?.string()
+            Log.e("API_ERROR", "Error in shuffle response: $errorBody")
+            // You might want to parse the errorBody to check the specific reason
+
+            // Show an appropriate message to the user based on the restriction
+            if (errorBody?.contains("Restriction violated") == true) {
+                showMessageToUser("Shuffle command not allowed. This could be due to your current Spotify plan or context.")
+            } else {
+                showMessageToUser("Shuffle command failed. Please try again later.")
+            }
+        } else {
+            Log.e("API_ERROR", "Unexpected error in shuffle response: ${response.errorBody()?.string()}")
+        }
+    }
+
+    private fun showMessageToUser(message: String) {
+        // Show a toast or any UI element to inform the user
+        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+
+    private fun updateShuffleButtonUI() {
+        if (isShuffleEnabled) {
+            shuffleButton.setColorFilter(ContextCompat.getColor(requireContext(), R.color.colorAccent))
+        } else {
+            shuffleButton.setColorFilter(ContextCompat.getColor(requireContext(), R.color.colorPrimary))
+        }
     }
 
     private fun observePlayerState() {
@@ -157,7 +219,6 @@ class PlayerScreenFragment : Fragment() {
                 if (response.isSuccessful) {
                     val queueResponse = response.body()
 
-                    // Log the entire response
                     Log.d("API_RESPONSE", "Queue Response: $queueResponse")
 
                     queueResponse?.currentlyPlaying?.let { currentlyPlayingTrack ->
@@ -172,7 +233,6 @@ class PlayerScreenFragment : Fragment() {
                         }
                     }
 
-                    // Extract and log the queue to see if it contains duplicates
                     val queue = queueResponse?.queue ?: emptyList()
                     Log.d("QUEUE_DEBUG", "Queue size: ${queue.size}, Queue items: $queue")
 
@@ -187,8 +247,6 @@ class PlayerScreenFragment : Fragment() {
             }
         })
     }
-
-
 
     private fun playSelectedTrack(trackUri: String) {
         lifecycleScope.launch {

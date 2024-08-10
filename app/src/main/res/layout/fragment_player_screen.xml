@@ -103,6 +103,18 @@
             android:src="@drawable/ic_next"
             app:tint="@color/playerTextColor" />
 
+        <ImageButton
+            android:id="@+id/shuffle_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_shuffle_black"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            app:tint="@color/colorPrimary"
+            tools:ignore="VectorDrawableCompat" />
+
+
+
     </LinearLayout>
 
     <!-- RecyclerView for Queue -->

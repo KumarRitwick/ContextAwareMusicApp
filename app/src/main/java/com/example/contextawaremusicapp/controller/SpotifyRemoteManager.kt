@@ -171,12 +171,14 @@ object SpotifyRemoteManager {
         context.startActivity(intent)
     }
 
-    fun observeTrackChanges(onTrackChanged: (String) -> Unit) {
+    fun observeTrackChanges(onTrackChanged: (String, String) -> Unit) {
         spotifyAppRemote?.playerApi?.subscribeToPlayerState()?.setEventCallback { playerState ->
             val trackName = playerState.track?.name ?: "Unknown Track"
-            onTrackChanged(trackName)
+            val artistName = playerState.track?.artist?.name ?: "Unknown Artist"
+            onTrackChanged(trackName, artistName)
         }
     }
+
 
     fun subscribeToPlayerState(onPlayerStateChanged: (PlayerState) -> Unit): Subscription<PlayerState>? {
         return spotifyAppRemote?.playerApi?.subscribeToPlayerState()?.setEventCallback(onPlayerStateChanged)

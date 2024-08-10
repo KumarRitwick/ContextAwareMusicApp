@@ -25,6 +25,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var playbackBar: View
     private lateinit var currentTrackName: TextView
+    private lateinit var currentArtistName: TextView
     private lateinit var playPauseButton: ImageButton
     private lateinit var trackArt: ImageView
     private var isPlaying: Boolean = false
@@ -47,6 +48,7 @@ class MainActivity : AppCompatActivity() {
     private fun setupUI() {
         playbackBar = findViewById(R.id.playback_bar)
         currentTrackName = findViewById(R.id.track_name)
+        currentArtistName = findViewById(R.id.artist_name)
         playPauseButton = findViewById(R.id.play_pause_button)
         trackArt = findViewById(R.id.track_art)
 
@@ -81,7 +83,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 SpotifyRemoteManager.playTrack(playlistUri)
                 isPlaying = true
-                updatePlaybackBar("Playing playlist...", isPlaying, trackArtUrl)
+                updatePlaybackBar("Playing playlist...", "Unknown Artist", isPlaying, trackArtUrl)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error playing playlist: $playlistUri", e)
             }
@@ -93,7 +95,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 SpotifyRemoteManager.pausePlayback()
                 isPlaying = false
-                updatePlaybackBar(currentTrackName.text.toString(), isPlaying)
+                updatePlaybackBar(currentTrackName.text.toString(), currentArtistName.text.toString(), isPlaying)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error pausing track", e)
             }
@@ -105,15 +107,16 @@ class MainActivity : AppCompatActivity() {
             try {
                 SpotifyRemoteManager.resumePlayback()
                 isPlaying = true
-                updatePlaybackBar(currentTrackName.text.toString(), isPlaying)
+                updatePlaybackBar(currentTrackName.text.toString(), currentArtistName.text.toString(), isPlaying)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error resuming track", e)
             }
         }
     }
 
-    private fun updatePlaybackBar(trackName: String, isPlaying: Boolean, trackArtUrl: String? = null) {
+    private fun updatePlaybackBar(trackName: String, artistName: String, isPlaying: Boolean, trackArtUrl: String? = null) {
         currentTrackName.text = trackName
+        currentArtistName.text = artistName // Updated to set the artist name
         playPauseButton.setImageResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play)
         playbackBar.visibility = View.VISIBLE
 
@@ -169,10 +172,8 @@ class MainActivity : AppCompatActivity() {
         super.onStart()
         SpotifyRemoteManager.connect(this, {
             Log.d("MainActivity", "Connected to Spotify App Remote")
-
-            // Observe track changes
-            SpotifyRemoteManager.observeTrackChanges { trackName ->
-                updatePlaybackBar(trackName, isPlaying = true)
+            SpotifyRemoteManager.observeTrackChanges { trackName, artistName ->
+                updatePlaybackBar(trackName, artistName, isPlaying = true)
             }
         }, { throwable ->
             Log.e("MainActivity", "Failed to connect to Spotify App Remote", throwable)
@@ -185,7 +186,7 @@ class MainActivity : AppCompatActivity() {
             try {
                 SpotifyRemoteManager.playTrack(audiobookUri)
                 isPlaying = true
-                updatePlaybackBar("Playing audiobook...", isPlaying, audiobookArtUrl)
+                updatePlaybackBar("Playing audiobook...", "Unknown Artist", isPlaying, audiobookArtUrl)
             } catch (e: Exception) {
                 Log.e("MainActivity", "Error playing audiobook: $audiobookUri", e)
             }

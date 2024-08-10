@@ -155,7 +155,6 @@ class PlayerScreenFragment : Fragment() {
     }
 
     private fun showMessageToUser(message: String) {
-        // Show a toast or any UI element to inform the user
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
     }
 

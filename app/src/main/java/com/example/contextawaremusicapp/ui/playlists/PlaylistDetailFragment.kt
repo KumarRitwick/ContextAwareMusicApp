@@ -44,8 +44,6 @@ class PlaylistDetailFragment : Fragment() {
             }
         }
         tracksRecyclerView.adapter = trackAdapter
-
-        // Assuming playlistUri is passed through navigation arguments
         val playlistUri = arguments?.getString("playlistUri") ?: return view
         fetchPlaylistDetails(playlistUri)
 

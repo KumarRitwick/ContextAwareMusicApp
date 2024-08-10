@@ -133,14 +133,14 @@ class HomeFragment : Fragment() {
     private fun updateRecommendedPlaylist() {
         val currentTimeCategory = getCurrentTimeCategory()
 
-        val category = when (currentTimeCategory) {
-            TimeCategory.MORNING -> "toplists"
-            TimeCategory.AFTERNOON -> "focus"
-            TimeCategory.EVENING -> "chill"
-            TimeCategory.NIGHT -> "party"
-            else -> "chill"
+        val (category, title) = when (currentTimeCategory) {
+            TimeCategory.MORNING -> "toplists" to "Rise & Shine"
+            TimeCategory.AFTERNOON -> "focus" to "Work Mode On"
+            TimeCategory.EVENING -> "chill" to "Unwind"
+            TimeCategory.NIGHT -> "party" to "Night Vibes"
+            else -> "chill" to "Unwind"
         }
-
+        recommendedPlaylistTitle.text = title
         fetchCategoryPlaylists(category, null)
     }
 

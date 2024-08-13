@@ -4,127 +4,136 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/playerBackgroundColor"
     tools:context=".ui.home.HomeFragment">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_height="wrap_content">
 
-        <!-- Main Recommendation Section -->
+        <ImageView
+            android:id="@+id/background_image"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/default_weather"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:contentDescription="@null" />
+
         <LinearLayout
-            android:id="@+id/recommended_playlist_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:clickable="true"
-            android:focusable="true"
-            android:background="?attr/selectableItemBackground">
+            android:padding="16dp"
+            tools:ignore="MissingConstraints">
 
-            <TextView
-                android:id="@+id/recommended_playlist_reason"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Why we recommend this:"
-                android:textSize="16sp"
-                android:textStyle="italic"
-                android:textColor="@color/playerTextColor"
-                android:padding="8dp"
-                android:background="@android:color/transparent"/>
-
-            <!-- Playlist Cover -->
-            <ImageView
-                android:id="@+id/recommended_playlist_cover"
+            <LinearLayout
+                android:id="@+id/recommended_playlist_container"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                tools:srcCompat="@drawable/placeholder_image" />
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
 
-            <!-- Playlist Title -->
+                <TextView
+                    android:id="@+id/recommended_playlist_reason"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Why we recommend this:"
+                    android:textSize="16sp"
+                    android:textStyle="bold|italic"
+                    android:textColor="@android:color/white"
+                    android:padding="8dp"
+                    android:background="@android:color/transparent"/>
+
+                <ImageView
+                    android:id="@+id/recommended_playlist_cover"
+                    android:layout_width="match_parent"
+                    android:layout_height="200dp"
+                    android:scaleType="centerCrop"
+                    tools:srcCompat="@drawable/placeholder_image" />
+
+                <TextView
+                    android:id="@+id/recommended_playlist_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recommended Playlist"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    android:padding="8dp" />
+            </LinearLayout>
+
             <TextView
-                android:id="@+id/recommended_playlist_title"
+                android:id="@+id/mood_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Recommended Playlist"
+                android:text="Mood"
                 android:textSize="20sp"
                 android:textStyle="bold"
-                android:textColor="@color/playerTextColor"
+                android:textColor="@android:color/white"
                 android:padding="8dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mood_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_corners" />
+
+            <TextView
+                android:id="@+id/workout_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Workout"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:padding="8dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/workout_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_corners" />
+
+            <TextView
+                android:id="@+id/jazz_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Jazz"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:padding="8dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/jazz_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_corners" />
+
+            <TextView
+                android:id="@+id/audiobooks_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Audiobooks"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/white"
+                android:padding="8dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/audiobooks_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:background="@drawable/rounded_corners" />
         </LinearLayout>
-
-        <!-- RecyclerView for Mood Playlists -->
-        <TextView
-            android:id="@+id/mood_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Mood"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/playerTextColor"
-            android:padding="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mood_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/playerBackgroundColor" />
-
-        <!-- RecyclerView for Workout Playlists -->
-        <TextView
-            android:id="@+id/workout_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Workout"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/playerTextColor"
-            android:padding="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/workout_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/playerBackgroundColor" />
-
-        <!-- RecyclerView for Jazz Playlists -->
-        <TextView
-            android:id="@+id/jazz_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Jazz"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/playerTextColor"
-            android:padding="8dp" />
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/jazz_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/playerBackgroundColor" />
-
-        <!-- Title for Audiobooks section -->
-        <TextView
-            android:id="@+id/audiobooks_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Audiobooks"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="@color/playerTextColor"
-            android:padding="8dp" />
-
-        <!-- RecyclerView for Audiobooks -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/audiobooks_recycler_view"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:background="@color/playerBackgroundColor" />
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

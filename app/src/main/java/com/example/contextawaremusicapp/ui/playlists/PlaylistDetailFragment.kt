@@ -99,14 +99,16 @@ class PlaylistDetailFragment : Fragment() {
         val playlistNameTextView = view?.findViewById<TextView>(R.id.playlist_name)
 
         playlistNameTextView?.text = playlist.name
-        if (playlist.images.isNotEmpty()) {
-            if (playlistImageView != null) {
+
+        playlistImageView?.let { imageView ->
+            if (playlist.images.isNotEmpty()) {
                 Glide.with(this)
                     .load(playlist.images[0].url)
-                    .into(playlistImageView)
+                    .into(imageView)
+            } else {
+                imageView.setImageResource(R.drawable.placeholder_image)
             }
-        } else {
-            playlistImageView?.setImageResource(R.drawable.placeholder_image)
         }
     }
+
 }

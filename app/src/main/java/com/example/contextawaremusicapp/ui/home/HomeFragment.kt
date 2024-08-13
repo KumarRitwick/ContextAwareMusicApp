@@ -1,7 +1,10 @@
 package com.example.contextawaremusicapp.ui.home
 
 import AudiobooksResponse
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -10,6 +13,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +24,8 @@ import com.example.contextawaremusicapp.controller.PlaylistAdapter
 import RecommendedPlaylistsResponse
 import androidx.navigation.fragment.findNavController
 import com.example.contextawaremusicapp.model.SpotifyApi
+import com.example.contextawaremusicapp.model.WeatherResponse
+import com.google.android.gms.location.LocationServices
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -41,25 +48,25 @@ class HomeFragment : Fragment() {
     private lateinit var recommendedPlaylistReason: TextView
     private var recommendedPlaylistUri: String? = null
 
+    private val locationPermissionCode = 101
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_home, container, false)
 
-        // Initialize recommended playlist views
+        // Initialize views
         recommendedPlaylistTitle = view.findViewById(R.id.recommended_playlist_title)
         recommendedPlaylistCover = view.findViewById(R.id.recommended_playlist_cover)
         recommendedPlaylistReason = view.findViewById(R.id.recommended_playlist_reason)
 
-        // Set up click listener for recommended playlist
         view.findViewById<View>(R.id.recommended_playlist_container).setOnClickListener {
             recommendedPlaylistUri?.let { uri ->
                 navigateToPlaylist(uri)
             }
         }
 
-        // Initialize RecyclerViews and their adapters
         moodRecyclerView = view.findViewById(R.id.mood_recycler_view)
         workoutRecyclerView = view.findViewById(R.id.workout_recycler_view)
         jazzRecyclerView = view.findViewById(R.id.jazz_recycler_view)
@@ -96,6 +103,9 @@ class HomeFragment : Fragment() {
 
         // Fetch recommended playlist based on time
         updateRecommendedPlaylist()
+
+        // Check location permissions and fetch weather data
+        checkLocationPermissionAndFetchWeather(view)
 
         return view
     }
@@ -191,6 +201,99 @@ class HomeFragment : Fragment() {
             }
         })
     }
+
+    private fun checkLocationPermissionAndFetchWeather(view: View) {
+        if (ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                locationPermissionCode
+            )
+        } else {
+            fetchLastKnownLocation(view)
+        }
+    }
+
+    private fun fetchLastKnownLocation(view: View) {
+        val fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
+
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                location?.let {
+                    fetchWeatherDataAndUpdateBackground(view, it.latitude, it.longitude)
+                } ?: Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                Toast.makeText(requireContext(), "Failed to get location", Toast.LENGTH_SHORT).show()
+            }
+    }
+
+    private fun fetchWeatherDataAndUpdateBackground(view: View, latitude: Double, longitude: Double) {
+        SpotifyApi.openMeteoService.getWeather(latitude, longitude).enqueue(object : Callback<WeatherResponse> {
+            override fun onResponse(call: Call<WeatherResponse>, response: Response<WeatherResponse>) {
+                if (response.isSuccessful) {
+                    val weatherResponse = response.body()
+                    if (weatherResponse != null) {
+                        val weatherCode = if (weatherResponse.current?.weather_code != 0) {
+                            weatherResponse.current?.weather_code
+                        } else {
+                            weatherResponse.daily?.weather_code?.firstOrNull()
+                        }
+
+                        if (weatherCode != null) {
+                            updateBackgroundImage(view, weatherCode)
+                        } else {
+                            Log.e("API_ERROR", "No valid weather code found")
+                            updateBackgroundImage(view, -1)
+                        }
+                    } else {
+                        Log.e("API_ERROR", "Error fetching weather data: Response is null")
+                        updateBackgroundImage(view, -1)
+                    }
+                } else {
+                    Log.e("API_ERROR", "Error fetching weather data: ${response.errorBody()?.string()}")
+                    updateBackgroundImage(view, -1)
+                }
+            }
+
+            override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
+                Log.e("API_FAILURE", "Weather API call failed: ${t.message}")
+                updateBackgroundImage(view, -1)
+            }
+        })
+    }
+
+    private fun updateBackgroundImage(view: View, weatherCode: Int) {
+        val backgroundImageResId = when (weatherCode) {
+            1 -> R.drawable.clear_weather
+            2 -> R.drawable.cloudy_weather
+            3 -> R.drawable.rainy_weather
+            4 -> R.drawable.snowy_weather
+            5 -> R.drawable.stormy_weather
+            else -> R.drawable.default_weather
+        }
+
+        val backgroundImageView: ImageView? = view.findViewById(R.id.background_image)
+        if (backgroundImageView != null) {
+            backgroundImageView.setImageResource(backgroundImageResId)
+        } else {
+            Log.e("HomeFragment", "ImageView with ID background_image not found")
+        }
+    }
+
 
     private fun getAccessToken(context: Context): String {
         val sharedPreferences = context.getSharedPreferences("SpotifyCredential", Context.MODE_PRIVATE)

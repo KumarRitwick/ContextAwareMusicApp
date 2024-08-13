@@ -92,9 +92,11 @@ interface OpenMeteoService {
     fun getWeather(
         @Query("latitude") latitude: Double,
         @Query("longitude") longitude: Double,
-        @Query("hourly") hourly: String = "weather_code",
+        @Query("current") current: String = "precipitation,rain,showers,snowfall,weather_code",
+        @Query("daily") daily: String = "weather_code",
         @Query("timezone") timezone: String = "GMT"
     ): Call<WeatherResponse>
 }
+
 
 

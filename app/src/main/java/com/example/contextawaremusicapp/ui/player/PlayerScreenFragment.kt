@@ -238,8 +238,6 @@ class PlayerScreenFragment : Fragment() {
                     }
 
                     val queue = queueResponse?.queue ?: emptyList()
-                    Log.d("QUEUE_DEBUG", "Queue size: ${queue.size}, Queue items: $queue")
-
                     trackAdapter.updateTracks(queue)
                 } else {
                     Log.e("API_ERROR", "Error in response: ${response.errorBody()?.string()}")
@@ -304,43 +302,49 @@ class PlayerScreenFragment : Fragment() {
                 if (response.isSuccessful) {
                     val weatherResponse = response.body()
                     if (weatherResponse != null) {
-                        val weatherCode = weatherResponse.current?.weather_code
-                            ?: weatherResponse.hourly?.weather_code?.firstOrNull()
+                        val weatherCode = if (weatherResponse.current?.weather_code != 0) {
+                            weatherResponse.current?.weather_code
+                        } else {
+                            weatherResponse.daily?.weather_code?.firstOrNull()
+                        }
 
                         if (weatherCode != null) {
-                            updateBackgroundColor(view, weatherCode)
+                            updateBackgroundImage(view, weatherCode)
                         } else {
-                            Log.e("API_ERROR", "Weather data is null")
+                            Log.e("API_ERROR", "No valid weather code found")
+                            updateBackgroundImage(view, -1)
                         }
                     } else {
-                        Log.e("API_ERROR", "Error fetching weather data: ${response.errorBody()?.string()}")
+                        Log.e("API_ERROR", "Error fetching weather data: Response is null")
+                        updateBackgroundImage(view, -1)
                     }
                 } else {
                     Log.e("API_ERROR", "Error fetching weather data: ${response.errorBody()?.string()}")
+                    updateBackgroundImage(view, -1)
                 }
             }
 
             override fun onFailure(call: Call<WeatherResponse>, t: Throwable) {
                 Log.e("API_FAILURE", "Weather API call failed: ${t.message}")
+                updateBackgroundImage(view, -1)
             }
         })
     }
 
-    private fun updateBackgroundColor(view: View, weatherCode: Int) {
-        val backgroundColorResId = when (weatherCode) {
-            1 -> R.color.clearWeather
-            2 -> R.color.cloudyWeather
-            3 -> R.color.rainyWeather
-            4 -> R.color.snowyWeather
-            5 -> R.color.stormyWeather
-            else -> R.color.defaultWeather
+
+    private fun updateBackgroundImage(view: View, weatherCode: Int) {
+        val backgroundImageResId = when (weatherCode) {
+            1 -> R.drawable.clear_weather
+            2 -> R.drawable.cloudy_weather
+            3 -> R.drawable.rainy_weather
+            4 -> R.drawable.snowy_weather
+            5 -> R.drawable.stormy_weather
+            else -> R.drawable.default_weather
         }
 
-        view.setBackgroundColor(ContextCompat.getColor(requireContext(), backgroundColorResId))
-        queueRecyclerView.setBackgroundColor(ContextCompat.getColor(requireContext(), backgroundColorResId))
+        val backgroundImageView: ImageView = view.findViewById(R.id.background_image)
+        backgroundImageView.setImageResource(backgroundImageResId)
     }
-
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,

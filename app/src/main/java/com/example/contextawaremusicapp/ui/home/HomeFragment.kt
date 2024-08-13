@@ -38,6 +38,7 @@ class HomeFragment : Fragment() {
 
     private lateinit var recommendedPlaylistTitle: TextView
     private lateinit var recommendedPlaylistCover: ImageView
+    private lateinit var recommendedPlaylistReason: TextView
     private var recommendedPlaylistUri: String? = null
 
     override fun onCreateView(
@@ -49,6 +50,7 @@ class HomeFragment : Fragment() {
         // Initialize recommended playlist views
         recommendedPlaylistTitle = view.findViewById(R.id.recommended_playlist_title)
         recommendedPlaylistCover = view.findViewById(R.id.recommended_playlist_cover)
+        recommendedPlaylistReason = view.findViewById(R.id.recommended_playlist_reason)
 
         // Set up click listener for recommended playlist
         view.findViewById<View>(R.id.recommended_playlist_container).setOnClickListener {
@@ -133,14 +135,16 @@ class HomeFragment : Fragment() {
     private fun updateRecommendedPlaylist() {
         val currentTimeCategory = getCurrentTimeCategory()
 
-        val (category, title) = when (currentTimeCategory) {
-            TimeCategory.MORNING -> "toplists" to "Rise & Shine"
-            TimeCategory.AFTERNOON -> "focus" to "Work Mode On"
-            TimeCategory.EVENING -> "chill" to "Unwind"
-            TimeCategory.NIGHT -> "party" to "Night Vibes"
-            else -> "chill" to "Unwind"
+        val (category, title, reason) = when (currentTimeCategory) {
+            TimeCategory.MORNING -> Triple("toplists", "Rise & Shine", "Start your day with energetic tunes")
+            TimeCategory.AFTERNOON -> Triple("focus", "Work Mode On", "Stay focused with these tracks")
+            TimeCategory.EVENING -> Triple("chill", "Unwind", "Relax after a long day")
+            TimeCategory.NIGHT -> Triple("party", "Night Vibes", "Get the party started")
+            else -> Triple("chill", "Unwind", "Enjoy a calming playlist")
         }
+
         recommendedPlaylistTitle.text = title
+        recommendedPlaylistReason.text = reason
         fetchCategoryPlaylists(category, null)
     }
 

@@ -23,6 +23,18 @@
             android:focusable="true"
             android:background="?attr/selectableItemBackground">
 
+            <TextView
+                android:id="@+id/recommended_playlist_reason"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Why we recommend this:"
+                android:textSize="16sp"
+                android:textStyle="italic"
+                android:textColor="@color/playerTextColor"
+                android:padding="8dp"
+                android:background="@android:color/transparent"/>
+
+            <!-- Playlist Cover -->
             <ImageView
                 android:id="@+id/recommended_playlist_cover"
                 android:layout_width="match_parent"
@@ -30,6 +42,7 @@
                 android:scaleType="centerCrop"
                 tools:srcCompat="@drawable/placeholder_image" />
 
+            <!-- Playlist Title -->
             <TextView
                 android:id="@+id/recommended_playlist_title"
                 android:layout_width="wrap_content"

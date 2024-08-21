@@ -95,16 +95,13 @@ class HomeFragment : Fragment() {
         jazzRecyclerView.adapter = jazzAdapter
         audiobooksRecyclerView.adapter = audiobookAdapter
 
-        // Fetch data for categories and audiobooks
         fetchCategoryPlaylists("mood", moodAdapter)
         fetchCategoryPlaylists("workout", workoutAdapter)
         fetchCategoryPlaylists("jazz", jazzAdapter)
         fetchAudiobooksByIds()
 
-        // Fetch recommended playlist based on time
         updateRecommendedPlaylist()
 
-        // Check location permissions and fetch weather data
         checkLocationPermissionAndFetchWeather(view)
 
         return view

@@ -11,9 +11,9 @@
     <color name="bottomNavigationActiveItem">#FFFFFF</color>
     <color name="bottomNavigationItemColor">#FFFFFF</color>
     <color name="playbackBarTextColor">#FFFFFF</color>
-    <color name="playerBackgroundColor">#1D1D1D</color>
+    <color name="playerBackgroundColor">#899499</color>
     <color name="playerTextColor">#FFFFFF</color>
-    <color name="playbackBarBackground">#333333</color>
+    <color name="playbackBarBackground">#B2BEB5</color>
     <color name="navigationBackground">#1D1D1D</color>
     <color name="iconTint">#FFFFFF</color>
     <color name="colorPrimary">#6200EE</color>

@@ -42,14 +42,10 @@ class PlaylistFragment : Fragment() {
         recommendationsRecyclerView.layoutManager = LinearLayoutManager(context)
 
         userPlaylistAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            // Navigate to PlaylistDetailFragment
             val action = PlaylistFragmentDirections.actionPlaylistFragmentToPlaylistDetailFragment(playlist.uri)
             findNavController().navigate(action)
         }
-
-        // Initializing the adapter with empty list
         recommendationsAdapter = PlaylistAdapter(emptyList()) { playlist ->
-            // Navigate to PlaylistDetailFragment
             val action = PlaylistFragmentDirections.actionPlaylistFragmentToPlaylistDetailFragment(playlist.uri)
             findNavController().navigate(action)
         }
@@ -58,8 +54,6 @@ class PlaylistFragment : Fragment() {
         recommendationsRecyclerView.adapter = recommendationsAdapter
 
         fetchUserPlaylists()
-
-        // Fetch different categories of playlists and add headers
         fetchCategoryPlaylists("toplists", "Top Lists")
         fetchCategoryPlaylists("mood", "Mood")
         fetchCategoryPlaylists("workout", "Workout")
@@ -83,7 +77,6 @@ class PlaylistFragment : Fragment() {
                 if (response.isSuccessful) {
                     val userId = response.body()?.id
                     if (userId != null) {
-                        // Fetch the user's playlists
                         SpotifyApi.spotifyService.getUserPlaylists("Bearer $accessToken", userId).enqueue(object : Callback<PlaylistsResponse> {
                             override fun onResponse(call: Call<PlaylistsResponse>, response: Response<PlaylistsResponse>) {
                                 if (response.isSuccessful) {
